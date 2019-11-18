@@ -7,8 +7,7 @@ This plugin utilizes the [kube-bench][kubebench] implementation of the [CIS secu
 To run this plugin, run the following command:
 
 ```
-sonobuoy run
---plugin https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/cis-benchmarks/cis-benchmarks/kube-bench-plugin.yaml --plugin https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/cis-benchmarks/cis-benchmarks/kube-bench-master-plugin.yaml 
+sonobuoy run --plugin https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/master/cis-benchmarks/kube-bench-plugin.yaml --plugin https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/master/cis-benchmarks/kube-bench-master-plugin.yaml
 ```
 
 ## Assumptions
