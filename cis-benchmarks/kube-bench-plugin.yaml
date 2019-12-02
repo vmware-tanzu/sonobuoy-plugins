@@ -40,7 +40,7 @@ spec:
   args:
   - -c
   - kube-bench --version 1.13 --outputfile /tmp/results/output.xml --junit ; echo -n /tmp/results/output.xml > /tmp/results/done
-  image: schnake/kube-bench:v0.2.0-demo
+  image: aquasec/kube-bench:0.2.1
   name: plugin
   resources: {}
   volumeMounts:
