@@ -21,7 +21,7 @@ REGISTRY ?= sonobuoy
 IMAGE = $(REGISTRY)/$(TARGET)
 DOCKER ?= docker
 DIR := ${CURDIR}
-VERSION ?= v0.2
+VERSION ?= v0.3
 
 ARCH    ?= amd64
 LINUX_ARCHS = amd64 arm64 ppc64le
