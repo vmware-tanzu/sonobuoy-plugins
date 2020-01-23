@@ -1,0 +1,16 @@
+sonobuoy-config:
+  driver: Job
+  plugin-name: kube-hunter
+  result-format: raw
+spec:
+  command:
+  - /bin/sh
+  - -c
+  - "python kube-hunter.py --pod --report=json | tee /tmp/results/report.json && echo -n /tmp/results/report.json > /tmp/results/done"
+  image: sonobuoy/kube-hunter:v0.2.0
+  name: plugin
+  resources: {}
+  volumeMounts:
+  - mountPath: /tmp/results
+    name: results
+
