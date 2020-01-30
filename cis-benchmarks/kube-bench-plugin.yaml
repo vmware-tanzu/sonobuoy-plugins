@@ -39,7 +39,7 @@ spec:
   - /bin/sh
   args:
   - -c
-  - kube-bench --version 1.13 --outputfile /tmp/results/output.xml --junit ; echo -n /tmp/results/output.xml > /tmp/results/done
+  - kube-bench --version 1.13 --outputfile /tmp/results/output.xml --junit ; echo -n /tmp/results/output.xml > /tmp/results/done ; while true; do echo "Sleeping for 1h to avoid daemonset restart"; sleep 3600; done
   image: aquasec/kube-bench:0.2.1
   name: plugin
   resources: {}
