@@ -1,0 +1,71 @@
+podSpec:
+  containers: []
+  dnsPolicy: ClusterFirstWithHostNet
+  hostIPC: true
+  hostNetwork: true
+  hostPID: true
+  serviceAccountName: sonobuoy-serviceaccount
+  tolerations:
+  - operator: Exists
+  volumes:
+  - name: var-vcap-jobs
+    hostPath:
+      path: "/var/vcap/jobs"
+  - name: var-vcap-data
+    hostPath:
+      path: "/var/vcap/data"
+  - name: etc-kubernetes
+    hostPath:
+      path: "/etc/kubernetes"
+  # Uncomment this volume definition if you wish to use Kubernetes version auto-detection in kube-bench.
+  # - name: usr-bin
+  #   hostPath:
+  #     path: "/usr/bin"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node-role.kubernetes.io/master
+            operator: DoesNotExist
+sonobuoy-config:
+  driver: DaemonSet
+  plugin-name: kube-bench-node
+  result-format: junit
+spec:
+  command:
+  - /bin/sh
+  args:
+  - -c
+  - /run-kube-bench.sh; while true; do echo "Sleeping for 1h to avoid daemonset restart"; /bin/sleep 3600; done
+  env:
+    - name: KUBERNETES_VERSION
+      value: "1.17"
+    - name: TARGET_MASTER
+      value: "false"
+    - name: TARGET_NODE
+      value: "true"
+    - name: TARGET_CONTROLPLANE
+      value: "false"
+    - name: TARGET_ETCD
+      value: "false"
+    - name: TARGET_POLICIES
+      value: "false"
+    - name: DISTRIBUTION
+      value: "entpks"
+  image: sonobuoy/kube-bench:0.2.3
+  name: plugin
+  resources: {}
+  volumeMounts:
+  - mountPath: /tmp/results
+    name: results
+  - name: var-vcap-jobs
+    mountPath: /var/vcap/jobs
+  - name: var-vcap-data
+    mountPath: /var/vcap/data
+  - name: etc-kubernetes
+    mountPath: /etc/kubernetes
+  # /usr/bin is mounted to access kubectl / kubelet, used by kube-bench for auto-detecting the Kubernetes version.
+  # You can omit this mount if you provide the version using the KUBERNETES_VERSION environment variable.
+  # - name: usr-bin
+  #   mountPath: /usr/bin

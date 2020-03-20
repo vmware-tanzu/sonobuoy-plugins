@@ -18,15 +18,19 @@
 set -o errexit
 
 # Return the config file to be used by kube-bench.
-# This will be expanded in future to accommodate custom configurations
-# for different providers.
+# If the specified distribution is supported, the path to a custom
+# configuration file will be returned. If not, the default configuration
+# is used.
 get_config() {
     # Assume default config path of cfg/config.yaml which is relative
     # to the workdir set in base image.
     local config="cfg/config.yaml"
 
-    case $PROVIDER in
-        # We will add custom configurations for different providers here.
+    case $DISTRIBUTION in
+        # We will add custom configurations for different distributions here.
+        "entpks")
+            config="cfg/entpks.yaml"
+            ;;
         "")
             # If unset, use default config file.
             ;;
