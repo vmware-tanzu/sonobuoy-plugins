@@ -1,0 +1,93 @@
+---
+master:
+  components:
+    - apiserver
+    - scheduler
+    - controllermanager
+    - etcd
+    - flanneld
+    - kubernetes
+
+  kubernetes:
+    defaultconf: /etc/kubernetes/config
+
+  apiserver:
+    bins:
+      - "kube-apiserver"
+
+  scheduler:
+    bins:
+      - "kube-scheduler"
+
+  controllermanager:
+    bins:
+      - "kube-controller-manager"
+
+  etcd:
+    optional: true
+    bins:
+      - "etcd"
+    confs:
+      - /var/vcap/jobs/etcd/config/bpm.yml
+
+  flanneld:
+    optional: true
+    bins:
+      - flanneld
+
+node:
+  components:
+    - kubelet
+    - proxy
+    - kubernetes
+
+  kubernetes:
+    defaultconf: /etc/kubernetes/config
+
+  kubelet:
+    cafile:
+      - /var/vcap/jobs/kubelet/config/kubelet-client-ca.pem
+    bins:
+      - "kubelet"
+    kubeconfig:
+      - /var/vcap/jobs/kubelet/config/kubeconfig
+    confs:
+      - /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+
+  proxy:
+    bins:
+      - "kube-proxy"
+    confs:
+      - /var/vcap/jobs/kube-proxy/config/config.yml
+    kubeconfig:
+      - /var/vcap/jobs/kube-proxy/config/kubeconfig
+
+etcd:
+  components:
+    - etcd
+
+  etcd:
+    bins:
+      - "etcd"
+    confs:
+      - /var/vcap/jobs/etcd/config/bpm.yml
+
+controlplane:
+  components: []
+
+policies:
+  components: []
+
+managedservices:
+  components: []
+
+version_mapping:
+  "1.11": "cis-1.3"
+  "1.12": "cis-1.3"
+  "1.13": "cis-1.4"
+  "1.14": "cis-1.4"
+  "1.15": "cis-1.5"
+  "1.16": "cis-1.5"
+  "1.17": "cis-1.5"
+  "ocp-3.10": "rh-0.7"
+  "ocp-3.11": "rh-0.7"

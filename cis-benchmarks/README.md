@@ -35,6 +35,10 @@ For all of the environment described below, they can be set by modifying the val
 ### Environment variable options
 * `KUBERNETES_VERSION`
   This can be set to specify the Kubernetes version of your cluster. This is used to determine which version of the CIS benchmark kube-bench will run.
+* `DISTRIBUTION`
+  This can be set if the default configuration for kube-bench is not compatible with the Kubernetes distribution you are using.
+  By setting this value, a distribution specific configuration will be used when running kube-bench.
+  Currently, the only distribution that is supported is [Enterprise PKS (`entpks`)](./entpks).
 
 The following environment variables should only be modified if your cluster is Kubernetes v1.15+ and as such will be running version 1.5 of the CIS benchmark.
 The default settings for these environment variables are compatible with all versions of the benchmark.
@@ -56,6 +60,16 @@ Each of targets can be enabled or disabled by setting the value for the appropri
 * `TARGET_POLICIES`
   Setting this to "true" enables the checks for Kubernetes policies. For CIS 1.5, this is Section 2. This target cannot be enabled for earlier versions of the benchmark.
   This is disabled by default in both plugins.
+
+## Distribution specific support
+
+Some Kubernetes distributions require custom configurations to be provided in order to run kube-bench correctly.
+To perform the checks listed in the CIS benchmark, it is necessary for kube-bench to know the locations on disk of various Kubernetes configuration files.
+If the paths for a distribution's configuration files are not included in the list of [default locations](https://github.com/aquasecurity/kube-bench/blob/master/cfg/config.yaml), these must be provided via the kube-bench configuration.
+
+This plugin will include custom configuration for different distributions.
+Currently, only Enterprise PKS is supported as a custom distribution.
+If a custom distribution is not specified as described above, the default configuration for kube-bench will be used.
 
 ## Assumptions
 
