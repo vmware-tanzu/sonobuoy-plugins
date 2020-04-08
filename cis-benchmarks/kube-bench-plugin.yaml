@@ -14,6 +14,9 @@ podSpec:
   - name: var-lib-kubelet
     hostPath:
       path: "/var/lib/kubelet"
+  - name: lib-systemd
+    hostPath:
+      path: "/lib/systemd"
   - name: etc-systemd
     hostPath:
       path: "/etc/systemd"
@@ -64,6 +67,8 @@ spec:
     mountPath: /var/lib/etcd
   - name: var-lib-kubelet
     mountPath: /var/lib/kubelet
+  - name: lib-systemd
+    mountPath: /lib/systemd
   - name: etc-systemd
     mountPath: /etc/systemd
   - name: etc-kubernetes
