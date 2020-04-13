@@ -53,7 +53,7 @@ spec:
       value: "false"
     - name: DISTRIBUTION
       value: "entpks"
-  image: sonobuoy/kube-bench:0.2.3
+  image: sonobuoy/kube-bench:0.3.0
   name: plugin
   resources: {}
   volumeMounts:
@@ -61,11 +61,16 @@ spec:
     name: results
   - name: var-vcap-jobs
     mountPath: /var/vcap/jobs
+    readOnly: true
   - name: var-vcap-data
     mountPath: /var/vcap/data
+    readOnly: true
   - name: etc-kubernetes
     mountPath: /etc/kubernetes
+    readOnly: true
   # /usr/bin is mounted to access kubectl / kubelet, used by kube-bench for auto-detecting the Kubernetes version.
+  # It is mounted at the path /usr/local/mount-from-host/bin to avoid overwriting /usr/bin within the container.
   # You can omit this mount if you provide the version using the KUBERNETES_VERSION environment variable.
   # - name: usr-bin
-  #   mountPath: /usr/bin
+  #   mountPath: /usr/local/mount-from-host/bin
+  #   readOnly: true

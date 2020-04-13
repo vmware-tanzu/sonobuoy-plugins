@@ -57,7 +57,7 @@ spec:
       value: "false"
     - name: TARGET_POLICIES
       value: "false"
-  image: sonobuoy/kube-bench:0.2.3
+  image: sonobuoy/kube-bench:0.3.0
   name: plugin
   resources: {}
   volumeMounts:
@@ -65,16 +65,23 @@ spec:
     name: results
   - name: var-lib-etcd
     mountPath: /var/lib/etcd
+    readOnly: true
   - name: var-lib-kubelet
     mountPath: /var/lib/kubelet
+    readOnly: true
   - name: lib-systemd
     mountPath: /lib/systemd
+    readOnly: true
   - name: etc-systemd
     mountPath: /etc/systemd
+    readOnly: true
   - name: etc-kubernetes
     mountPath: /etc/kubernetes
+    readOnly: true
   # /usr/bin is mounted to access kubectl / kubelet, used by kube-bench for auto-detecting the Kubernetes version. 
+  # It is mounted at the path /usr/local/mount-from-host/bin to avoid overwriting /usr/bin within the container.
   # You can omit this mount if you provide the version using the KUBERNETES_VERSION environment variable.           
   # - name: usr-bin
-  #   mountPath: /usr/bin
+  #   mountPath: /usr/local/mount-from-host/bin
+  #   readOnly: true
 
