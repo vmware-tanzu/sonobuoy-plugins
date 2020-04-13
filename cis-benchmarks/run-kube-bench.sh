@@ -31,6 +31,9 @@ get_config() {
         "entpks")
             config="cfg/entpks.yaml"
             ;;
+        "gke")
+            # Although we support GKE as a custom distribution, it uses the default configuration.
+            ;;
         "")
             # If unset, use default config file.
             ;;
@@ -41,16 +44,43 @@ get_config() {
     echo $config
 }
 
-# Return the version flag with the version if specified. This enables users
-# to still use the version auto-detect feature if needed.
-get_version_flag() {
-    local version_flag=""
+# Returns 0 if the $1 is less than or equal to $2, otherwise 1
+verlte() {
+    [  "$1" = "`printf "%s\n%s" $1 $2 | sort -V | head -n1`" ]
+}
 
-    if [ -n "$KUBERNETES_VERSION" ]; then
-        version_flag="--version $KUBERNETES_VERSION"
-    fi
+# Returns 0 if the $1 is less than $2, otherwise 1
+verlt() {
+    [ "$1" = "$2" ] && return 1 || verlte "$1" "$2"
+}
 
-    echo $version_flag
+# Return either the version or benchmark flag to be used.
+# If a distribution requiring a particular benchmark is provided, this will be returned,
+# otherwise return the version flag with the version if specified. This enables users
+# to still use the version auto-detect feature if desired.
+get_version_or_benchmark_flag() {
+    local vb_flag=""
+
+    # If the distribution is GKE, then we may need to explicitly set the benchmark version that should be used.
+    case $DISTRIBUTION in
+        "gke")
+            # The GKE specific benchmark is only suitable for Kubernetes 1.15 and later. If the provided
+            # version is less than this, fall back to specifying the version manually.
+            if [ -n "$KUBERNETES_VERSION" ] && verlt "$KUBERNETES_VERSION" "1.15" ; then
+                vb_flag="--version $KUBERNETES_VERSION"
+            else
+                vb_flag="--benchmark gke-1.0"
+            fi
+            ;;
+        *)
+            if [ -n "$KUBERNETES_VERSION" ]; then
+                vb_flag="--version $KUBERNETES_VERSION"
+            fi
+            ;;
+    esac
+
+
+    echo $vb_flag
 }
 
 # Return a space separated list of targets to provide to kube-bench.
@@ -80,16 +110,21 @@ get_targets() {
         targets="${targets} policies"
     fi
 
+    # This target is only compatible when running the GKE benchmark.
+    if [ "$TARGET_MANAGED_SERVICES" = true ]; then
+        targets="${targets} managedservices"
+    fi
+
     echo $targets
 }
 
 run_kube_bench() {
     local config="$(get_config)"
-    local version_flag="$(get_version_flag)"
+    local vb_flag="$(get_version_or_benchmark_flag)"
     local targets="$(get_targets)"
 
     for target in $targets; do
-        kube-bench --config $config run $version_flag --targets $target --outputfile /tmp/results/$target.xml --junit
+        kube-bench --config $config run $vb_flag --targets $target --outputfile /tmp/results/$target.xml --junit
     done
 
     tar czf /tmp/results/results.tar.gz /tmp/results/*.xml
