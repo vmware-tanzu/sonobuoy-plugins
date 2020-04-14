@@ -38,7 +38,7 @@ For all of the environment described below, they can be set by modifying the val
 * `DISTRIBUTION`
   This can be set if the default configuration for kube-bench is not compatible with the Kubernetes distribution you are using.
   By setting this value, a distribution specific configuration will be used when running kube-bench.
-  Currently, the only distribution that is supported is [Enterprise PKS (`entpks`)](./entpks).
+  The supported distributions are [Enterprise PKS (`entpks`)](./entpks) and [Google Kubernetes Engine (`gke`)](./gke).
 
 The following environment variables should only be modified if your cluster is Kubernetes v1.15+ and as such will be running version 1.5 of the CIS benchmark.
 The default settings for these environment variables are compatible with all versions of the benchmark.
@@ -60,6 +60,15 @@ Each of targets can be enabled or disabled by setting the value for the appropri
 * `TARGET_POLICIES`
   Setting this to "true" enables the checks for Kubernetes policies. For CIS 1.5, this is Section 2. This target cannot be enabled for earlier versions of the benchmark.
   This is disabled by default in both plugins.
+
+The following environment variables are distribution specific.
+They should not be enabled unless you are running against a distribution where they are valid and compatible.
+Enabling these when running against an unsupported distribution will result in the plugin failing to run correctly.
+
+* `TARGET_MANAGED_SERVICES`
+  Setting this to "true" enables the checks for managed service components.
+  This target is only available when running the [CIS GKE benchmark](./gke).
+  This is enabled by default for the GKE version of the plugin.
 
 ## Distribution specific support
 
