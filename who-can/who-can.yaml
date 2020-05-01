@@ -1,0 +1,24 @@
+sonobuoy-config:
+  driver: Job
+  plugin-name: who-can
+  result-format: manual
+spec:
+  command:
+  - /bin/bash
+  args:
+  - -c
+  - /who-can --resources-report /tmp/results/resources-report.json --subjects-report /tmp/results/subjects-report.json --sonobuoy-report /tmp/results/sonobuoy_results.yaml;
+    tar czvf /tmp/results/results.tar.gz -C /tmp/results/ .;
+    echo -n /tmp/results/results.tar.gz > /tmp/results/done
+  image: sonobuoy/who-can:v0.1
+  name: plugin
+  resources: {}
+  volumeMounts:
+  - mountPath: /tmp/results
+    name: results
+  env:
+  - name: WHO_CAN_CONFIG
+    value: |
+      namespaces:
+        - kube-system
+        - "*"
