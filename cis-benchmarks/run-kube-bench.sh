@@ -54,6 +54,11 @@ verlt() {
     [ "$1" = "$2" ] && return 1 || verlte "$1" "$2"
 }
 
+# Returns 0 if $KUBERNETES_VERSION is set and is less than 1.15, otherwise 1
+kubernetes_lt_1_15() {
+    [ -n "$KUBERNETES_VERSION" ] && verlt "$KUBERNETES_VERSION" "1.15" ]
+}
+
 # Return either the version or benchmark flag to be used.
 # If a distribution requiring a particular benchmark is provided, this will be returned,
 # otherwise return the version flag with the version if specified. This enables users
@@ -66,7 +71,7 @@ get_version_or_benchmark_flag() {
         "gke")
             # The GKE specific benchmark is only suitable for Kubernetes 1.15 and later. If the provided
             # version is less than this, fall back to specifying the version manually.
-            if [ -n "$KUBERNETES_VERSION" ] && verlt "$KUBERNETES_VERSION" "1.15" ; then
+            if kubernetes_lt_1_15 ; then
                 vb_flag="--version $KUBERNETES_VERSION"
             else
                 vb_flag="--benchmark gke-1.0"
@@ -96,24 +101,39 @@ get_targets() {
     fi
 
     # Other targets are only compatible with kube-bench for Kubernetes 1.15 and later.
-    # We could prevent them from being added, however we may not always know the
-    # version being tested as the user may be relying on version being auto-detected.
-    if [ "$TARGET_CONTROLPLANE" = true ]; then
-        targets="${targets} controlplane"
+    # If the Kubernetes version is known and is less than 1.15, don't add the targets if
+    # they are requested.
+    # If the verison is not known (for example, using kube-bench verison autodetection), then
+    # these targets are always added if requested.
+    if ! kubernetes_lt_1_15; then
+        if [ "$TARGET_CONTROLPLANE" = true ]; then
+            targets="${targets} controlplane"
+        fi
+
+        if [ "$TARGET_ETCD" = true ]; then
+            targets="${targets} etcd"
+        fi
+
+        if [ "$TARGET_POLICIES" = true ]; then
+            targets="${targets} policies"
+        fi
     fi
 
-    if [ "$TARGET_ETCD" = true ]; then
-        targets="${targets} etcd"
-    fi
-
-    if [ "$TARGET_POLICIES" = true ]; then
-        targets="${targets} policies"
-    fi
-
-    # This target is only compatible when running the GKE benchmark.
-    if [ "$TARGET_MANAGED_SERVICES" = true ]; then
-        targets="${targets} managedservices"
-    fi
+    # Some targets are distribution dependent and only work when running specific benchmark versions.
+    case $DISTRIBUTION in
+        "gke")
+            # The managedservices target is only compatible when running on GKE with the GKE specific benchmark
+            # for Kubernetes 1.15 and later.
+            # If the Kubernetes version is known and is less than 1.15, don't add the target if requested.
+            # If the verison is not known (for example, using kube-bench verison autodetection), then the
+            # the target is always added if requested.
+            if [ "$TARGET_MANAGED_SERVICES" = true ] && ! kubernetes_lt_1_15; then
+                targets="${targets} managedservices"
+            fi
+            ;;
+        *)
+            ;;
+    esac
 
     echo $targets
 }
