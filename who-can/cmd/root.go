@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/vmware-tanzu/sonobuoy-plugins/who-can/pkg/whocan"
@@ -24,6 +25,10 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 )
+
+const subjectsReportFlag = "subjects-report"
+const resourcesReportFlag = "resources-report"
+const sonobuoyReportFlag = "sonobuoy-report"
 
 func NewWhoCanCommand() *cobra.Command {
 	var subjectsReport string
@@ -35,16 +40,22 @@ func NewWhoCanCommand() *cobra.Command {
 	cmds := &cobra.Command{
 		Use:   "who-can",
 		Short: "Creates reports of who can perform actions in your cluster",
-		Long:  "TODO enter long description here",
+		Long:  "who-can iterates over all resources in your Kubernetes cluster and produces reports detailing which subjects have RBAC permissions to perform actions against those resources",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if subjectsReport == "" && resourcesReport == "" && sonobuoyReport == "" {
+				return fmt.Errorf("No output file specified. Must provide at least one of --%v, --%v, or --%v", subjectsReportFlag, resourcesReportFlag, sonobuoyReportFlag)
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runWhoCanPlugin(subjectsReport, resourcesReport, sonobuoyReport, restQPS, restBurst)
 		},
 	}
 
 	cmds.ResetFlags()
-	cmds.Flags().StringVar(&subjectsReport, "subjects-report", "", "Generate a JSON report of the results by subject at the given path")
-	cmds.Flags().StringVar(&resourcesReport, "resources-report", "", "Generate a JSON report of the results by resource at the given path")
-	cmds.Flags().StringVar(&sonobuoyReport, "sonobuoy-report", "", "Generate a Sonobuoy results report by subject at the given path")
+	cmds.Flags().StringVar(&subjectsReport, subjectsReportFlag, "", "Generate a JSON report of the results by subject at the given path")
+	cmds.Flags().StringVar(&resourcesReport, resourcesReportFlag, "", "Generate a JSON report of the results by resource at the given path")
+	cmds.Flags().StringVar(&sonobuoyReport, sonobuoyReportFlag, "", "Generate a Sonobuoy results report by subject at the given path")
 	cmds.Flags().Float32Var(&restQPS, "qps", 100.0, "QPS for Kubernetes REST client")
 	cmds.Flags().IntVar(&restBurst, "burst", 50, "Burst for Kubernetes REST client")
 	return cmds
