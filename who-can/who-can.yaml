@@ -10,7 +10,7 @@ spec:
   - /who-can --resources-report /tmp/results/resources-report.json --subjects-report /tmp/results/subjects-report.json --sonobuoy-report /tmp/results/sonobuoy_results.yaml;
     tar czvf /tmp/results/results.tar.gz -C /tmp/results/ .;
     echo -n /tmp/results/results.tar.gz > /tmp/results/done
-  image: sonobuoy/who-can:v0.1
+  image: sonobuoy/who-can:v0.1.1
   name: plugin
   resources: {}
   volumeMounts:
