@@ -202,33 +202,39 @@ This report is a YAML file with the following format:
 name: who-can
 status: complete
 items:
-- name: create bindings -n kube-system
+- name: system:masters can create bindings in default
+  status: complete
   details:
-    namespace: kube-system
+    cluster-role-bindings: cluster-admin
+    namespace: default
     resource: bindings
+    subject-kind: Group
+    subject-name: system:masters
     verb: create
-  items:
-  - name: system:masters
-    details:
-      kind: Group
-    items:
-    - name: clusterrolebindings
-      items:
-      - name: cluster-admin
-  - name: sonobuoy-serviceaccount
-    details:
-      kind: ServiceAccount
-      namespace: sonobuoy
-    items:
-    - name: clusterrolebindings
-      items:
-      - name: sonobuoy-serviceaccount-sonobuoy
+- name: sonobuoy-serviceaccount can create bindings in default
+  status: complete
+  details:
+    cluster-role-bindings: sonobuoy-serviceaccount-sonobuoy
+    namespace: default
+    resource: bindings
+    subject-kind: ServiceAccount
+    subject-name: sonobuoy-serviceaccount
+    subject-namespace: sonobuoy
+    verb: create
   ...
 ```
 
 The Sonobuoy results format is used to describe the results for a plugin.
 In this report, we can see that the `who-can` plugin has the status `complete`.
 The `items` entry is an array where each entry represents a check that was performed.
-The first item was the check to find which Subjects could `create bindings` in the `kube-system` namespace.
-In the `details` map, we can see the individual components that made up this check.
-The result `items` for this check are the Subjects that are permitted to perform this action along with the `rolebindings` or `clusterrolebindings` that enable them to perform the action.
+The first item describes that the `system:masters` subject can `create` `bindings` in the `default` namespace.
+
+Within the `details` map, we can see the details for the check and the results.
+The Subject details are prefixed with `subject-`.
+We can see that the `subject-name` is `system:masters` and its `subject-kind` is `Group`.
+If the `subject-kind` is `ServiceAccount`, the `subject-namespace` will also be included.
+
+The details for the check can be found in the `verb`, `resource` and `namespace` fields.
+These describe what the Subject can do, for example `create` `bindings` in the `default` namespace.
+
+Finally, the `role-bindings` or `cluster-role-bindings` that allow that Subject to perform that action are provided as a comma separated list.
