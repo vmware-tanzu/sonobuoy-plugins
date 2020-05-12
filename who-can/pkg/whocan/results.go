@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 	rbac "k8s.io/api/rbac/v1"
@@ -159,57 +160,34 @@ type SonobuoyResultsItem struct {
 	Items    []SonobuoyResultsItem `json:"items,omitempty" yaml:"items,omitempty"`
 }
 
-func createSonobuoyResultsForSubjectBindings(subject rbac.Subject, bindings Bindings) SonobuoyResultsItem {
-	subjectItem := SonobuoyResultsItem{
-		Name: subject.Name,
-		Details: map[string]string{
-			"kind": subject.Kind,
-		},
-	}
-	if subject.Namespace != "" {
-		subjectItem.Details["namespace"] = subject.Namespace
-	}
+func createSonobuoyResultsForResult(result Result) []SonobuoyResultsItem {
+	var results = []SonobuoyResultsItem{}
 
-	if len(bindings.RoleBindings) != 0 {
-		rbItem := SonobuoyResultsItem{
-			Name: "rolebindings",
-		}
-		for _, rb := range bindings.RoleBindings {
-			rbItem.Items = append(rbItem.Items, SonobuoyResultsItem{
-				Name: rb,
-			})
-		}
-		subjectItem.Items = append(subjectItem.Items, rbItem)
-	}
-
-	if len(bindings.ClusterRoleBindings) != 0 {
-		crbItem := SonobuoyResultsItem{
-			Name: "clusterrolebindings",
-		}
-		for _, crb := range bindings.ClusterRoleBindings {
-			crbItem.Items = append(crbItem.Items, SonobuoyResultsItem{
-				Name: crb,
-			})
-		}
-
-		subjectItem.Items = append(subjectItem.Items, crbItem)
-	}
-	return subjectItem
-}
-
-func createSonobuoyResultsForResult(result Result) SonobuoyResultsItem {
-	resultItem := SonobuoyResultsItem{
-		Name: fmt.Sprintf("%v %v -n %v", result.Verb, result.Resource, result.Namespace),
-		Details: map[string]string{
-			"verb":      result.Verb,
-			"resource":  result.Resource,
-			"namespace": result.Namespace,
-		},
-	}
 	for subject, bindings := range result.Subjects {
-		resultItem.Items = append(resultItem.Items, createSonobuoyResultsForSubjectBindings(subject, bindings))
+		resultItem := SonobuoyResultsItem{
+			Name:   fmt.Sprintf("%v can %v %v in %v", subject.Name, result.Verb, result.Resource, result.Namespace),
+			Status: "complete",
+			Details: map[string]string{
+				"subject-name": subject.Name,
+				"subject-kind": subject.Kind,
+				"verb":         result.Verb,
+				"resource":     result.Resource,
+				"namespace":    result.Namespace,
+			},
+		}
+		if subject.Namespace != "" {
+			resultItem.Details["subject-namespace"] = subject.Namespace
+		}
+		if len(bindings.RoleBindings) != 0 {
+			resultItem.Details["role-bindings"] = strings.Join(bindings.RoleBindings, ", ")
+		}
+
+		if len(bindings.ClusterRoleBindings) != 0 {
+			resultItem.Details["cluster-role-bindings"] = strings.Join(bindings.ClusterRoleBindings, ", ")
+		}
+		results = append(results, resultItem)
 	}
-	return resultItem
+	return results
 }
 
 func (r *Results) WriteSonobuoyReport(w io.Writer) error {
@@ -218,7 +196,8 @@ func (r *Results) WriteSonobuoyReport(w io.Writer) error {
 		Status: "complete",
 	}
 	for _, result := range *r {
-		sonobuoyResults.Items = append(sonobuoyResults.Items, createSonobuoyResultsForResult(result))
+		results := createSonobuoyResultsForResult(result)
+		sonobuoyResults.Items = append(sonobuoyResults.Items, results...)
 	}
 	j, err := yaml.Marshal(sonobuoyResults)
 	if err != nil {
