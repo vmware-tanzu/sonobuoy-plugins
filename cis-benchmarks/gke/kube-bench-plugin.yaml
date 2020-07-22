@@ -25,8 +25,8 @@ podSpec:
   #   hostPath:
   #     path: "/usr/bin"
   affinity:
-    nodeAffinity: 
-      requiredDuringSchedulingIgnoredDuringExecution: 
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
         - matchExpressions:
           - key: node-role.kubernetes.io/master
@@ -58,7 +58,7 @@ spec:
       value: "true"
     - name: DISTRIBUTION
       value: "gke"
-  image: sonobuoy/kube-bench:0.3.0
+  image: sonobuoy/kube-bench:0.3.1
   name: plugin
   resources: {}
   volumeMounts:
@@ -76,10 +76,9 @@ spec:
   - name: etc-kubernetes
     mountPath: /etc/kubernetes
     readOnly: true
-  # /usr/bin is mounted to access kubectl / kubelet, used by kube-bench for auto-detecting the Kubernetes version. 
+  # /usr/bin is mounted to access kubectl / kubelet, used by kube-bench for auto-detecting the Kubernetes version.
   # It is mounted at the path /usr/local/mount-from-host/bin to avoid overwriting /usr/bin within the container.
-  # You can omit this mount if you provide the version using the KUBERNETES_VERSION environment variable.           
+  # You can omit this mount if you provide the version using the KUBERNETES_VERSION environment variable.
   # - name: lib-systemd
   #   mountPath: /usr/local/mount-from-host/bin
   #   readOnly: true
-
