@@ -5,7 +5,8 @@ Running the plugin on EKS does not require any additional configuration files, j
 
 EKS does not provide access to master nodes within a cluster.
 Due to this, it is not possible to run the "kube-bench-master" plugin.
-Only the plugin for running on worker nodes is provided here which runs the `node`, `policies`, and `managedservices` targets.
+Only the plugin for running on worker nodes is provided here which runs the `node` target.
+The `policies` and `managedservices` targets will be added once [aquasecurity/kube-bench#644](https://github.com/aquasecurity/kube-bench/issues/644) is resolved.
 
 Which version of the CIS benchmark to run depends on the version of your cluster.
 For clusters with a version lower than v1.15, the standard version of the CIS benchmark for that version should be used.
