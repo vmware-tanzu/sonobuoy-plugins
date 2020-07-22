@@ -67,8 +67,8 @@ Enabling these when running against an unsupported distribution will result in t
 
 * `TARGET_MANAGED_SERVICES`
   Setting this to "true" enables the checks for managed service components.
-  This target is only available when running the [CIS GKE benchmark](./gke) or the [CIS EKS benchmark](./eks).
-  This is enabled by default for the GKE and EKS versions of the plugin.
+  This target is only available when running the [CIS GKE benchmark](./gke).
+  This is enabled by default for the GKE version of the plugin.
 
 ## Distribution specific support
 

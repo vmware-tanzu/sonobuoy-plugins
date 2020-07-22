@@ -112,7 +112,7 @@ get_targets() {
     # Other targets are only compatible with kube-bench for Kubernetes 1.15 and later.
     # If the Kubernetes version is known and is less than 1.15, don't add the targets if
     # they are requested.
-    # If the verison is not known (for example, using kube-bench verison autodetection), then
+    # If the version is not known (for example, using kube-bench version autodetection), then
     # these targets are always added if requested.
     if ! kubernetes_lt_1_15; then
         if [ "$TARGET_CONTROLPLANE" = true ]; then
@@ -130,7 +130,7 @@ get_targets() {
 
     # Some targets are distribution dependent and only work when running specific benchmark versions.
     case $DISTRIBUTION in
-        "gke"|"eks")
+        "gke")
             # The managedservices target is only compatible when running on GKE with the GKE specific benchmark,
             # or on EKS with the EKS specific benchmark
             # for Kubernetes 1.15 and later.
