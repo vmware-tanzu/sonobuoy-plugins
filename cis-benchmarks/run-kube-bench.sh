@@ -31,8 +31,8 @@ get_config() {
         "entpks")
             config="cfg/entpks.yaml"
             ;;
-        "gke")
-            # Although we support GKE as a custom distribution, it uses the default configuration.
+        "gke"|"eks")
+            # Although we support GKE and EKS as custom distributions, they use the default configuration.
             ;;
         "")
             # If unset, use default config file.
@@ -77,6 +77,15 @@ get_version_or_benchmark_flag() {
                 vb_flag="--benchmark gke-1.0"
             fi
             ;;
+        "eks")
+            # The EKS specific benchmark is only suitable for Kubernetes 1.15 and later. If the provided
+            # version is less than this, fall back to specifying the version manually.
+            if kubernetes_lt_1_15 ; then
+                vb_flag="--version $KUBERNETES_VERSION"
+            else
+                vb_flag="--benchmark eks-1.0"
+            fi
+            ;;
         *)
             if [ -n "$KUBERNETES_VERSION" ]; then
                 vb_flag="--version $KUBERNETES_VERSION"
@@ -103,7 +112,7 @@ get_targets() {
     # Other targets are only compatible with kube-bench for Kubernetes 1.15 and later.
     # If the Kubernetes version is known and is less than 1.15, don't add the targets if
     # they are requested.
-    # If the verison is not known (for example, using kube-bench verison autodetection), then
+    # If the version is not known (for example, using kube-bench version autodetection), then
     # these targets are always added if requested.
     if ! kubernetes_lt_1_15; then
         if [ "$TARGET_CONTROLPLANE" = true ]; then
@@ -122,11 +131,12 @@ get_targets() {
     # Some targets are distribution dependent and only work when running specific benchmark versions.
     case $DISTRIBUTION in
         "gke")
-            # The managedservices target is only compatible when running on GKE with the GKE specific benchmark
+            # The managedservices target is only compatible when running on GKE with the GKE specific benchmark,
+            # or on EKS with the EKS specific benchmark
             # for Kubernetes 1.15 and later.
             # If the Kubernetes version is known and is less than 1.15, don't add the target if requested.
-            # If the verison is not known (for example, using kube-bench verison autodetection), then the
-            # the target is always added if requested.
+            # If the version is not known (for example, using kube-bench version autodetection), then the
+            # target is always added if requested.
             if [ "$TARGET_MANAGED_SERVICES" = true ] && ! kubernetes_lt_1_15; then
                 targets="${targets} managedservices"
             fi

@@ -28,8 +28,8 @@ podSpec:
   #   hostPath:
   #     path: "/usr/bin"
   affinity:
-    nodeAffinity: 
-      requiredDuringSchedulingIgnoredDuringExecution: 
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
         - matchExpressions:
           - key: node-role.kubernetes.io/master
@@ -57,7 +57,7 @@ spec:
       value: "false"
     - name: TARGET_POLICIES
       value: "false"
-  image: sonobuoy/kube-bench:0.3.0
+  image: sonobuoy/kube-bench:0.3.1
   name: plugin
   resources: {}
   volumeMounts:
