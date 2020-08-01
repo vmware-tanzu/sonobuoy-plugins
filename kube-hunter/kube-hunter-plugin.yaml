@@ -13,4 +13,3 @@ spec:
   volumeMounts:
   - mountPath: /tmp/results
     name: results
-
