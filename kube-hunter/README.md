@@ -4,10 +4,10 @@
 
 # Getting started
 
-To run the plugin, just grab the plugin defintion (`kube-hunter-plugin.yaml`) and run:
+To run this plugin with the default options, run the following command:
 
 ```
-sonobuoy run -f kube-hunter-plugin.yaml --wait
+sonobuoy run --plugin https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/master/kube-hunter/kube-hunter-plugin.yaml --wait
 ```
 
 The plugin creates a JSON document which lists all the known issues. This can be found in the resulting Sonobuoy tarball.
