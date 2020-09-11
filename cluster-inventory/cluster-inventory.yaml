@@ -1,0 +1,41 @@
+podSpec:
+  containers: []
+  restartPolicy: Never
+  serviceAccountName: sonobuoy-serviceaccount
+  tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+    operator: Exists
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - key: kubernetes.io/e2e-evict-taint-key
+    operator: Exists
+  volumes:
+  - name: etc-cni-netd
+    hostPath:
+      path: /etc/cni/net.d
+  - name: opt-cni-bin
+    hostPath:
+      path: /opt/cni/bin
+sonobuoy-config:
+  driver: Job
+  plugin-name: cluster-inventory
+  result-format: manual
+spec:
+  command:
+    - /bin/bash
+  args:
+    - -c
+    - /cluster-inventory run --sonobuoy-report /tmp/results/sonobuoy_results.yaml --json-report /tmp/results/json_results.json;
+      tar czvf /tmp/results/results.tar.gz -C /tmp/results/ .;
+      echo -n /tmp/results/results.tar.gz > /tmp/results/done
+  image: sonobuoy/cluster-inventory:v0.0.1
+  name: plugin
+  resources: {}
+  volumeMounts:
+  - mountPath: /tmp/results
+    name: results
+  - mountPath: /etc/cni/net.d
+    name: etc-cni-netd
+  - mountPath: /opt/cni/bin
+    name: opt-cni-bin
