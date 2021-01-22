@@ -29,7 +29,7 @@ spec:
     - /cluster-inventory run --sonobuoy-report /tmp/results/sonobuoy_results.yaml --json-report /tmp/results/json_results.json;
       tar czvf /tmp/results/results.tar.gz -C /tmp/results/ .;
       echo -n /tmp/results/results.tar.gz > /tmp/results/done
-  image: sonobuoy/cluster-inventory:v0.0.1
+  image: sonobuoy/cluster-inventory:v0.0.2
   name: plugin
   resources: {}
   volumeMounts:
