@@ -1,0 +1,18 @@
+#@ def config():
+checks:
+- name: "Pod QOS check"
+  description: Checks each pod to see if the minimum desired QOS is defined.
+  kind: v1alpha1/pod/qos
+  spec:
+    minimum_desired_qos_class: Guaranteed
+    include_detail: true
+- name: "Service Owner Check"
+  description: Checks for a specific configurable annotation on all services in the cluster.
+  kind: v1alpha1/service/annotations
+  spec:
+   key: incident-url
+   include_annotations: true
+- name: "Liveness and Readiness Probes"
+  description: Checks for whether liveness probe and readiness probe are defined.
+  kind: v1alpha1/pod/probes
+#@ end
