@@ -1,0 +1,4 @@
+/.git
+/vendor
+/reliability-scanner
+*.tar.gz
