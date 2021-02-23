@@ -6,12 +6,12 @@ checks:
   spec:
     minimum_desired_qos_class: Guaranteed
     include_detail: true
-- name: "Service Owner Check"
-  description: Checks for a specific configurable annotation on all services in the cluster.
-  kind: v1alpha1/service/annotations
+- name: "Namespace Owner Check"
+  description: Checks Namespaces for an owner label.
+  kind: v1alpha1/namespace/labels
   spec:
-   key: incident-url
-   include_annotations: true
+   key: owner
+   include_labels: true
 - name: "Liveness and Readiness Probes"
   description: Checks for whether liveness probe and readiness probe are defined.
   kind: v1alpha1/pod/probes

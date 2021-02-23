@@ -1,4 +1,4 @@
-package annotations
+package labels
 
 import (
 	"fmt"
@@ -12,14 +12,14 @@ import (
 )
 
 var (
-	checkName string     = "annotations"
+	checkName string = "labels"
 )
 
 // QuerierSpec defines the Specification for a Querier.
 type QuerierSpec struct {
-	Key                string `yaml:"key"`
-	ValidateURL        bool   `yaml:"validate_url"`
-	IncludeAnnotations bool   `yaml:"include_annotations"`
+	Key           string `yaml:"key"`
+	ValidateURL   bool   `yaml:"validate_url"`
+	IncludeLabels bool   `yaml:"include_labels"`
 }
 
 // Querier defines the query and set of checks.
@@ -30,11 +30,11 @@ type Querier struct {
 
 // AddtoRunner configures a runner with the Querier for this check.
 func (querier *Querier) AddtoRunner(runner *internal.Runner) {
-			runner.Queriers = append(runner.Queriers, querier)
-			runner.Logger.WithFields(log.Fields{
-				"check_name": checkName,
-				"phase": "add",
-			}).Info("complete")
+	runner.Queriers = append(runner.Queriers, querier)
+	runner.Logger.WithFields(log.Fields{
+		"check_name": checkName,
+		"phase":      "add",
+	}).Info("complete")
 }
 
 // NewQuerier returns a new configured Querier.
@@ -57,7 +57,7 @@ func NewQuerier(spec *QuerierSpec) (Querier, error) {
 func (q Querier) Start(cfg *internal.QuerierConfig) {
 	cfg.Logger.WithFields(log.Fields{
 		"check_name": checkName,
-		"phase": "add",
+		"phase":      "add",
 	}).Info(internal.CheckStartMsg)
 
 	checkItem := internal.ReportItem{
@@ -65,35 +65,31 @@ func (q Querier) Start(cfg *internal.QuerierConfig) {
 		Status: "passed",
 	}
 
-	services, err := q.client.CoreV1().Services("").List(cfg.Context, metav1.ListOptions{})
+	namespaces, err := q.client.CoreV1().Namespaces().List(cfg.Context, metav1.ListOptions{})
 	if err != nil {
 		checkItem.Status = "failed"
 	}
 
-	for _, service := range services.Items {
+	for _, namespace := range namespaces.Items {
 
 		details := make(map[string]interface{})
 
-		if service.ObjectMeta.Labels["sonobuoy-component"] == "aggregator" {
-			continue
-		}
-
-		if q.Spec.IncludeAnnotations {
-			annotations := make(map[string]interface{})
-			for k, v := range service.Labels {
-				annotations[k] = v
+		if q.Spec.IncludeLabels {
+			labels := make(map[string]interface{})
+			for k, v := range namespace.Labels {
+				labels[k] = v
 			}
-			details["annotations"] = annotations
+			details["labels"] = labels
 		}
 
 		item := internal.Item{
-			Name:    service.ObjectMeta.Name,
+			Name:    namespace.ObjectMeta.Name,
 			Status:  "passed",
 			Details: details,
 		}
 
 		if strings.TrimSpace(q.Spec.Key) != "" {
-			if _, exists := service.ObjectMeta.Annotations[q.Spec.Key]; !exists {
+			if _, exists := namespace.ObjectMeta.Labels[q.Spec.Key]; !exists {
 				checkItem.Status = "failed"
 				item.Status = "failed"
 				item.Details["error"] = fmt.Sprintf("key: %s does not exist", q.Spec.Key)
@@ -103,16 +99,16 @@ func (q Querier) Start(cfg *internal.QuerierConfig) {
 	}
 
 	cfg.Logger.WithFields(log.Fields{
-		"component": "check",
+		"component":  "check",
 		"check_name": checkName,
-		"phase": "complete",
+		"phase":      "complete",
 	}).Info(internal.CheckCompleteMsg)
 
 	cfg.Results <- checkItem
-	
+
 	cfg.Logger.WithFields(log.Fields{
-		"component": "check",
+		"component":  "check",
 		"check_name": checkName,
-		"phase": "write",
+		"phase":      "write",
 	}).Info(internal.CheckWriteMsg)
 }
