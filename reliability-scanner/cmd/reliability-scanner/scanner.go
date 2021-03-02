@@ -8,9 +8,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/api/v1alpha1/namespace/labels"
 	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/api/v1alpha1/pod/probes"
 	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/api/v1alpha1/pod/qos"
-	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/api/v1alpha1/service/annotations"
 	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/internal"
 )
 
@@ -85,17 +85,17 @@ func scan() {
 				}).Error(err)
 			}
 			querier.AddtoRunner(runner)
-		case "v1alpha1/service/annotations":
-			includeAnnotations, err := strconv.ParseBool(checkCfg.Spec["include_annotations"])
+		case "v1alpha1/namespace/labels":
+			includeLabels, err := strconv.ParseBool(checkCfg.Spec["include_labels"])
 			if err != nil {
 				runner.Logger.WithFields(logrus.Fields{
 					"check_name": checkCfg.Spec["Name"],
 					"phase":      "add",
 				}).Error(err)
 			}
-			querier, err := annotations.NewQuerier(&annotations.QuerierSpec{
-				Key:                checkCfg.Spec["key"],
-				IncludeAnnotations: includeAnnotations,
+			querier, err := labels.NewQuerier(&labels.QuerierSpec{
+				Key:           checkCfg.Spec["key"],
+				IncludeLabels: includeLabels,
 			})
 			if err != nil {
 				runner.Logger.WithFields(logrus.Fields{

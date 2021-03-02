@@ -1,6 +1,6 @@
 REGISTRY = "projects.registry.vmware.com/cre"
 IMAGE = "reliability-scanner"
-TAG = "v0.1.0"
+TAG = "v0.1.1"
 
 .SILENT: cycle
 clean:
