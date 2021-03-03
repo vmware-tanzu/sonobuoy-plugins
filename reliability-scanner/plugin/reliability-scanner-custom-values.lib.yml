@@ -1,18 +1,23 @@
 #@ def config():
 checks:
-- name: "Pod QOS check"
+- name: "Pod Disruption"
+  description: Checks each namespace to see if Pods are covered under a disruption budget.
+  kind: v1alpha1/pod/disruption
+  spec:
+    include_detail: true
+- name: "Pod QOS"
   description: Checks each pod to see if the minimum desired QOS is defined.
   kind: v1alpha1/pod/qos
   spec:
     minimum_desired_qos_class: Guaranteed
     include_detail: true
-- name: "Namespace Owner Check"
+- name: "Namespace Owner"
   description: Checks Namespaces for an owner label.
   kind: v1alpha1/namespace/labels
   spec:
-   key: owner
-   include_labels: true
-- name: "Liveness and Readiness Probes"
-  description: Checks for whether liveness probe and readiness probe are defined.
+    key: owner
+    include_detail: true
+- name: "Pod Probes"
+  description: Checks for whether liveness and readiness probes are defined.
   kind: v1alpha1/pod/probes
 #@ end

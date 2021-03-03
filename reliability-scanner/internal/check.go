@@ -1,10 +1,10 @@
 package internal
 
-
 // Check is a configured check ready to be added to a runner.
 type Check interface {
 	AddtoRunner(*Runner)
 }
+
 // CheckConfig defines a Check.
 type CheckConfig struct {
 	Name        string            `yaml:"name"`

@@ -19,7 +19,6 @@ var (
 type QuerierSpec struct {
 	MinimumDesiredQOSClass string `yaml:"minimum_desired_qos_class"`
 	IncludeDetail          bool   `yaml:"include_detail"`
-	// ExcludeLabelled []string `yaml:"exclude_labelled"`
 }
 
 // Querier defines the query and set of checks
