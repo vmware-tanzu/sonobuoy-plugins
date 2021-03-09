@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -27,8 +28,9 @@ type Querier interface {
 
 // Runner runs the included Queriers, based on the configured Checks provided.
 type Runner struct {
+	Config   *ReliabilityConfig
 	Context  context.Context
-	Queriers   []Querier
+	Queriers []Querier
 	Results  chan ReportItem
 	Complete chan struct{}
 	Logger   *log.Logger
@@ -36,9 +38,17 @@ type Runner struct {
 
 // Run runs the Runner
 func (runner Runner) Run() {
+	if len(runner.Config.Checks) < 1 {
+		runner.Logger.WithFields(log.Fields{
+			"component": "runner",
+			"phase":     "run",
+		}).Error("no checks configured")
+		os.Exit(1)
+	}
+
 	runner.Logger.WithFields(log.Fields{
 		"component": "runner",
-		"phase": "run",
+		"phase":     "run",
 	}).Info("waiting for checks to complete")
 
 	for _, querier := range runner.Queriers {
@@ -50,5 +60,3 @@ func (runner Runner) Run() {
 		})
 	}
 }
-
-
