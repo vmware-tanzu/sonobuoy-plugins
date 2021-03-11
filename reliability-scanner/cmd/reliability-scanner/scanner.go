@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -52,11 +53,7 @@ func scan() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-<<<<<<< HEAD
-
-=======
 	logger.Info(fmt.Sprintf("Configured %v checks.", len(c.Checks)))
->>>>>>> 31119db... setup basic CI for reliability-scanner
 	runner.Run()
 	report := runner.BuildReport(len(c.Checks), reportName)
 	err = runner.WriteReport(report, filePath)
