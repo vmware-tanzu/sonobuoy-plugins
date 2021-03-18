@@ -43,19 +43,19 @@ spec:
     - /run-kube-bench.sh; while true; do echo "Sleeping for 1h to avoid daemonset restart"; /bin/sleep 3600; done
   env:
     - name: KUBERNETES_VERSION
-      value: "1.15"
+      value: "1.19"
     - name: TARGET_MASTER
       value: "false"
     - name: TARGET_NODE
       value: "true"
     - name: TARGET_CONTROLPLANE
-      value: "false"
+      value: "true"
     - name: TARGET_ETCD
       value: "false"
     - name: TARGET_POLICIES
-      value: "false"
+      value: "true"
     - name: TARGET_MANAGED_SERVICES
-      value: "false"
+      value: "true"
     - name: DISTRIBUTION
       value: "eks"
   image: sonobuoy/kube-bench:0.5.0
