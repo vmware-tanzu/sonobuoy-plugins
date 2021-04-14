@@ -1,8 +1,10 @@
 REGISTRY ?= "projects.registry.vmware.com/cre"
 IMAGE ?= "reliability-scanner"
-TAG ?= "v0.1.2"
+TAG ?= "v0.1.3"
 
-.SILENT: cycle
+.SILENT: welcome
+welcome:
+	echo "Please use 'make run' to run the Reliability Scanner."
 clean:
 	rm -rf ./generated/
 	rm -rf *.tar.gz

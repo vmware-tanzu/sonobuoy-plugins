@@ -2,8 +2,10 @@ package main
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/api/v1alpha1/backup/staleness"
 	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/api/v1alpha1/namespace/labels"
 	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/api/v1alpha1/pod/disruption"
 	"github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner/api/v1alpha1/pod/probes"
@@ -81,7 +83,32 @@ func initializeQueriers(runner *internal.Runner) error {
 				return err
 			}
 			querier.AddtoRunner(runner)
+		case "v1alpha1/backup/staleness":
+			spec := staleness.QuerierSpec{
+				BackupNamespace: checkCfg.Spec["backup_namespace"],
+			}
+			if checkCfg.Spec["max_age"] != "" {
+				maxAge, err := time.ParseDuration(checkCfg.Spec["max_age"])
+				if err != nil {
+					runner.Logger.WithFields(logrus.Fields{
+						"check_name": checkCfg.Spec["Name"],
+						"phase":      "add",
+					}).Error(err)
+					return err
+				}
+				spec.MaxAge = maxAge
+			}
+			querier, err := staleness.NewQuerier(&spec)
+			if err != nil {
+				runner.Logger.WithFields(logrus.Fields{
+					"check_name": checkCfg.Spec["Name"],
+					"phase":      "add",
+				}).Error(err)
+				return err
+			}
+			querier.AddtoRunner(runner)
 		}
+
 	}
 	return nil
 }

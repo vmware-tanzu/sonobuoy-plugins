@@ -10,7 +10,7 @@ spec:
       configMapKeyRef:
         name: reliability-scanner-cm
         key: reliability-scanner.yaml
-  image: projects.registry.vmware.com/cre/reliability-scanner:v0.1.2
+  image: projects.registry.vmware.com/cre/reliability-scanner:v0.1.3
   name: plugin
   resources: {}
   volumeMounts:
