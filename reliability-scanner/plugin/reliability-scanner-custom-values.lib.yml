@@ -1,5 +1,10 @@
 #@ def config():
 checks:
+- name: "Backup Freshness"
+  description: Checks for Velero backups to ensure there are successful fresh backups.
+  kind: v1alpha1/backup/staleness
+  spec:
+    backup_namespace: velero
 - name: "Pod Disruption"
   description: Checks each namespace to see if Pods are covered under a disruption budget.
   kind: v1alpha1/pod/disruption

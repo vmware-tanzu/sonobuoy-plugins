@@ -9,9 +9,12 @@ The resulting report, or status of a completed scan can assist an end-user to id
 ## Getting Started
 
 ### Dependencies
-[Sonobuoy](https://github.com/vmware-tanzu/sonobuoy)
-[YTT](https://github.com/vmware-tanzu/carvel-ytt)
-[GNU Make](https://www.gnu.org/software/make/)
+
+- [Sonobuoy](https://github.com/vmware-tanzu/sonobuoy)
+- [YTT](https://github.com/vmware-tanzu/carvel-ytt)
+- [GNU Make](https://www.gnu.org/software/make/)
+
+
 
 Currently, the plugin is distributed as a docker container. The Reliability Scanner requires YTT as a dependancy for configuration templating.
 
@@ -44,5 +47,6 @@ Checks currently available through the Reliability Scanner are as follows.
 | v1alpha1 | pod     | probes      | -                         | Checks if Pod Liveness/Readiness Probes are defined.                       | -                                               | -              |
 | v1alpha1 | namespace | labels | key                       | Checks for a specific Namespace label.                    | String                                          | "owner" |
 |          |         |             | include_labels       | Include currently configured labels.                                  | Boolean, [true/false]                           | true           |                                                         
+| v1alpha1 | backups | staleness   | backup_namespace                       | The Namespace to query for backups.                    | String                                          | "velero" |
 
 Each check may be conditionally included and customized to suit the requirements of the target cluster. The default set of checks are defined in `./plugin/reliability-scanner-custom-values.lib.yml`.
