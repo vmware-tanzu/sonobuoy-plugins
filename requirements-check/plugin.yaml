@@ -1,0 +1,63 @@
+config-map:
+  input.json: |
+    [
+      {
+        "meta": {
+          "name": "Kubernetes version",
+          "description": "At this time only K8s >= v1.18.0 is supported.",
+          "type": "k8s_version"
+        },
+        "k8s_version": {
+          "version": "v1.18.0"
+        }
+      },
+      {
+        "meta": {
+          "name": "Kubernetes provider",
+          "description": "At this time only KinD is supported.",
+          "type": "provider"
+        },
+        "provider": {
+          "in": [
+            "kind"
+          ]
+        }
+      }, {
+      "meta": {
+        "name": "Master node requirements",
+        "description": "Need at least one master node with 1.5 cpu and 2.5Gi memory.",
+        "type": "node"
+      },
+      "node": {
+        "label": "node-role.kubernetes.io/master",
+        "memory": "11.5Gi",
+        "cpu": "10",
+        "count": 1
+      }
+    },{
+      "meta": {
+        "name": "kapp-controller version",
+        "description": "Requires v0.17.0+. Name and annotation are based on publicly provided installation yaml and may differ if changes were made to your deployment.",
+        "type": "deployment"
+      },
+      "deployment": {
+        "name": "kapp-controller",
+        "annotation": "kapp-controller.carvel.dev/version",
+        "version": "v0.17.0"
+      }
+    }
+    ]
+sonobuoy-config:
+  driver: Job
+  plugin-name: clusterquery
+  result-format: manual
+spec:
+  command:
+  - ./cluster-query
+  image: schnake/requirementscheck:v0
+  name: plugin
+  resources: {}
+  volumeMounts:
+  - mountPath: /tmp/results
+    name: results
+
