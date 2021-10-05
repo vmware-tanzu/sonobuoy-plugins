@@ -265,8 +265,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
-github.com/vmware-tanzu/sonobuoy v0.53.2 h1:BUhUpguquk22034b9VPP0VqY5td9a4hQvjnLpnV1FhU=
-github.com/vmware-tanzu/sonobuoy v0.53.2/go.mod h1:VN3+v6dc8g3rU25U+xgi28JATPSWQmNTfVRhg+Y2RBQ=
+github.com/vmware-tanzu/sonobuoy v1.11.5-prerelease.1.0.20211004145628-b633b4fefcdc h1:r2yO4l7SJdfTSBHWR2pVOQ+XND7qC0R14+aMoec+Zsk=
+github.com/vmware-tanzu/sonobuoy v1.11.5-prerelease.1.0.20211004145628-b633b4fefcdc/go.mod h1:VN3+v6dc8g3rU25U+xgi28JATPSWQmNTfVRhg+Y2RBQ=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
