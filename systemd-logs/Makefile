@@ -24,8 +24,8 @@ DIR := ${CURDIR}
 VERSION ?= v0.3
 
 ARCH    ?= amd64
-LINUX_ARCHS = amd64 arm64 ppc64le
-PLATFORMS = linux/amd64,linux/arm64,linux/ppc64le
+LINUX_ARCHS = amd64 arm64 ppc64le s390x
+PLATFORMS = linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
 
 IMAGEARCH ?=
 QEMUARCH  ?=
@@ -48,6 +48,9 @@ QEMUARCH  = aarch64
 else ifeq ($(ARCH),ppc64le)
 IMAGEARCH = ppc64le/
 QEMUARCH  = ppc64le
+else ifeq ($(ARCH),s390x)
+IMAGEARCH = s390x/
+QEMUARCH  = s390x
 else
 $(error unknown arch "$(ARCH)")
 endif
