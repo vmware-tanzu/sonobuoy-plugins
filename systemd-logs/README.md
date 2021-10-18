@@ -9,3 +9,17 @@ You typically do not need to target this plugin manually since it is currently i
 ```
 sonobuoy run
 ```
+
+## Releases
+
+To build/push for release run:
+
+```bash
+make push
+```
+
+If you are on a Mac when pushing you'll need to modify the Makefile
+to download the darwin version of the manifest-tool and also
+provide --username and --password in the `push_manifest` target. Because
+of the way Mac handles the Docker credentials, the manifest-tool doesn't
+properly access them otherwise.
