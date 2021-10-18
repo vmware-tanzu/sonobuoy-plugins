@@ -17,7 +17,7 @@ spec:
         fieldPath: spec.nodeName
   - name: RESULTS_DIR
     value: /tmp/results
-  image: sonobuoy/systemd-logs:v0.3
+  image: sonobuoy/systemd-logs:v0.4
   imagePullPolicy: IfNotPresent
   name: systemd-logs
   resources: {}
