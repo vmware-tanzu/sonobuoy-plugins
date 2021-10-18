@@ -17,7 +17,7 @@
 ARG IMAGEARCH
 FROM alpine:3.9.2 as qemu
 RUN apk add --no-cache curl
-ARG QEMUVERSION=2.9.1
+ARG QEMUVERSION=6.1.0-6
 ARG QEMUARCH
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
