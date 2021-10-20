@@ -4,10 +4,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	sono "github.com/vmware-tanzu/sonobuoy/pkg/client/results"
+	"gopkg.in/yaml.v2"
 )
 
-const(
+const (
 	defaultOutputFileName = "manual_results.yaml"
 )
 
@@ -18,7 +20,7 @@ type SonobuoyResultsWriter struct {
 }
 
 func NewDefaultSonobuoyResultsWriter() SonobuoyResultsWriter {
-	return NewSonobuoyResultsWriter(os.Getenv("SONOBUOY_RESULTS_DIR"),defaultOutputFileName)
+	return NewSonobuoyResultsWriter(os.Getenv("SONOBUOY_RESULTS_DIR"), defaultOutputFileName)
 }
 
 func NewSonobuoyResultsWriter(resultsDir, outputFile string) SonobuoyResultsWriter {
@@ -56,7 +58,7 @@ func (w SonobuoyResultsWriter) AddTest(
 }
 
 func (w SonobuoyResultsWriter) Done() error {
-	w.Data.Status=sono.AggregateStatus(w.Data.Items...)
+	w.Data.Status = sono.AggregateStatus(w.Data.Items...)
 
 	outfile, err := os.Create(filepath.Join(w.ResultsDir, w.OutputFile))
 	if err != nil {
