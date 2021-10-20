@@ -1,0 +1,32 @@
+podSpec:
+  containers:
+    - name: postprocessing
+      image: schnake/postprocessor:v0
+      command: postprocessor
+      args: ["--ignore-skipped"]
+  restartPolicy: Never
+  serviceAccountName: sonobuoy-serviceaccount
+sonobuoy-config:
+  driver: Job
+  plugin-name: outputgen
+  result-format: junit
+spec:
+  command:
+  - /bin/sh
+  args: ["-c","mkdir -p ${SONOBUOY_RESULTS_DIR} && find /tmp/sonobuoy && echo pluginoutput > ${SONOBUOY_RESULTS_DIR}/output"]
+  env:
+  - name: SONOBUOY
+    value: "true"
+  - name: SONOBUOY_CONFIG_DIR
+    value: /tmp/sonobuoy/config
+  - name: SONOBUOY_K8S_VERSION
+    value: v1.20.0
+  - name: SONOBUOY_RESULTS_DIR
+    value: /tmp/sonobuoy/results
+  image: busybox:latest
+  imagePullPolicy: IfNotPresent
+  name: plugin
+  resources: {}
+  volumeMounts:
+  - mountPath: /tmp/sonobuoy/results
+    name: results
