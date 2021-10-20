@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/sirupsen/logrus"
 	"github.com/vmware-tanzu/sonobuoy/pkg/tarball"
 )
 
@@ -19,10 +20,16 @@ const(
 func Done() error{
 	dir := GetResultsDir()
 	outputFile := filepath.Join(dir, DefaultTarballName)
+	logrus.Tracef("Tarring up directory: %v",dir)
 	if err := tarball.DirToTarball(dir, outputFile,true ); err!=nil{
 		return fmt.Errorf("failed to tar up entire results directory: %w",err)
 	}
-	return WriteDone(outputFile)
+	logrus.Trace("Writing done file...")
+	if err:= WriteDone(outputFile); err !=nil{
+		return err
+	}
+	logrus.Trace("Done file written without error.")
+	return nil
 }
 
 func GetResultsDir() string{
@@ -30,7 +37,7 @@ func GetResultsDir() string{
 }
 
 func WriteDone(resultsPath string) error{
-	if err:=os.WriteFile(filepath.Join(GetResultsDir(), DoneFileName), []byte(DefaultTarballName), 0666); err !=nil{
+	if err:=os.WriteFile(filepath.Join(GetResultsDir(), DoneFileName), []byte(resultsPath), 0666); err !=nil{
 		return fmt.Errorf("failed write done file: %w",err)
 	}
 	return nil
