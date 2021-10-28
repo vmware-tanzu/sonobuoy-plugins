@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/pkg/errors v0.9.1
+	github.com/sirupsen/logrus v1.4.2
 	github.com/vmware-tanzu/sonobuoy v1.11.5-prerelease.1.0.20211004145628-b633b4fefcdc
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -23,7 +24,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b // indirect
-	github.com/sirupsen/logrus v1.4.2 // indirect
 	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
