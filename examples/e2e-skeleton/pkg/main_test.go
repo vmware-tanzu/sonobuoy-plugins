@@ -14,85 +14,79 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package pkg
 
 import (
 	"context"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
+	"os"
 	"testing"
 
+	plugin_helper "github.com/vmware-tanzu/sonobuoy-plugins/plugin-helper"
+	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/e2e-framework/pkg/env"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
-	"sigs.k8s.io/e2e-framework/pkg/features"
 )
 
-func Hello(name string) string {
-	return fmt.Sprintf("Hello %s", name)
+const (
+	ProgressReporterCtxKey = "SONOBUOY_PROGRESS_REPORTER"
+)
+
+var testenv env.Environment
+
+func TestMain(m *testing.M) {
+	// Assume we are running in the cluster as a Sonobuoy plugin.
+	testenv = env.NewInClusterConfig()
+
+	// Specifying a run ID so that multiple runs wouldn't collide. Allow a prefix to be set via env var
+	// so that a plugin configuration (yaml file) can easily set that without code changes.
+	nsPrefix := os.Getenv("NS_PREFIX")
+	runID := envconf.RandomName(nsPrefix, 4)
+
+	// Create updateReporter; will also place into context during Setup for use in features.
+	updateReporter := plugin_helper.NewProgressReporter(0)
+
+	testenv.Setup(func(ctx context.Context, config *envconf.Config) (context.Context, error) {
+		// Try and create the client; doing it before all the tests allows the tests to assume
+		// it can be created without error and they can just use config.Client().
+		_,err:=config.NewClient()
+		return context.WithValue(ctx,ProgressReporterCtxKey,updateReporter) ,err
+	})
+
+	testenv.BeforeEachTest(func(ctx context.Context, cfg *envconf.Config, t *testing.T) (context.Context, error) {
+		updateReporter.StartTest(t.Name())
+		return createNSForTest(ctx, cfg, t, runID)
+	})
+	testenv.AfterEachTest(func(ctx context.Context, cfg *envconf.Config, t *testing.T) (context.Context, error) {
+		updateReporter.StopTest(t.Name(),t.Failed(),t.Skipped(),nil)
+		return deleteNSForTest(ctx, cfg, t, runID)
+	})
+
+	os.Exit(testenv.Run(m))
 }
 
-// TestHello shows an example of a test environment
-// that uses a simple setup to assess a feature (test)
-// in a test function directly (outside of test suite TestMain)
-func TestHello(t *testing.T) {
-	e := env.NewWithConfig(envconf.New())
-	feat := features.New("Hello Feature").
-		WithLabel("type", "simple").
-		Assess("test message", func(ctx context.Context, t *testing.T, _ *envconf.Config) context.Context {
-			result := Hello("foo")
-			if result != "Hello foo" {
-				t.Error("unexpected message")
-			}
-			return ctx
-		})
+// CreateNSForTest creates a random namespace with the runID as a prefix. It is stored in the context
+// so that the deleteNSForTest routine can look it up and delete it.
+func createNSForTest(ctx context.Context, cfg *envconf.Config, t *testing.T, runID string) (context.Context, error) {
+	ns := envconf.RandomName(runID, 10)
+	ctx = context.WithValue(ctx, nsKey(t), ns)
 
-	e.Test(t, feat.Feature())
+	t.Logf("Creating NS %v for test %v", ns, t.Name())
+	nsObj := v1.Namespace{}
+	nsObj.Name = ns
+	return ctx, cfg.Client().Resources().Create(ctx, &nsObj)
 }
 
-// The following shows an example of a simple
-// test function that uses feature with a setup
-// step.
-func TestHello_WithSetup(t *testing.T) {
-	e := env.NewWithConfig(envconf.New())
-	var name string
-	feat := features.New("Hello Feature").
-		WithLabel("type", "simple").
-		Setup(func(ctx context.Context, t *testing.T, _ *envconf.Config) context.Context {
-			name = "foobar"
-			return ctx
-		}).
-		Assess("test message", func(ctx context.Context, t *testing.T, _ *envconf.Config) context.Context {
-			result := Hello(name)
-			if result != "Hello foobar" {
-				t.Error("unexpected message")
-			}
-			return ctx
-		}).Feature()
+// DeleteNSForTest looks up the namespace corresponding to the given test and deletes it.
+func deleteNSForTest(ctx context.Context, cfg *envconf.Config, t *testing.T, runID string) (context.Context, error) {
+	ns := fmt.Sprint(ctx.Value(nsKey(t)))
+	t.Logf("Deleting NS %v for test %v", ns, t.Name())
 
-	e.Test(t, feat)
+	nsObj := v1.Namespace{}
+	nsObj.Name = ns
+	return ctx, cfg.Client().Resources().Delete(ctx, &nsObj)
 }
 
-// The following shows an example of a simple
-// test function that reaches out to the API server.
-func TestAPICall(t *testing.T) {
-	c,err := envconf.NewWithKubeconfig("")
-	if err !=nil{
-		t.Fatalf("Failed to get in-cluster config: %v", err)
-	}
-	e := env.NewWithConfig(c)
-	feat := features.New("API Feature").
-		WithLabel("type", "API").
-		Assess("test message", func(ctx context.Context, t *testing.T, c *envconf.Config) context.Context {
-			var pods v1.PodList
-			if err := c.Client().Resources("kube-system").List(ctx, &pods); err != nil {
-				t.Error(err)
-			}
-			t.Logf("Got pods %v in namespace", len(pods.Items))
-			if len(pods.Items) == 0 {
-				t.Errorf("Expected >0 pods in kube-system but got %v", len(pods.Items))
-			}
-			return ctx
-		}).Feature()
-
-	e.Test(t, feat)
+func nsKey(t *testing.T) string {
+	return "NS-for-%v" + t.Name()
 }
