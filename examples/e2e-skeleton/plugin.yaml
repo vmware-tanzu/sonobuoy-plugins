@@ -1,7 +1,7 @@
 sonobuoy-config:
   driver: Job
   plugin-name: custom-e2e
-  result-format: go-json
+  result-format: gojson
 spec:
   command:
   - bash
