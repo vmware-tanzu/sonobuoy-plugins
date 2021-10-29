@@ -16,6 +16,8 @@ sonobuoy-config:
   driver: Job
   plugin-name: e2e
   result-format: junit
+  source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/e2e/e2e.yaml
+  description: The end-to-end tests maintained by Kubernetes to test the health of your cluster.
 spec:
   command:
   - /run_e2e.sh

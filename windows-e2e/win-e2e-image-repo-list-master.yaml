@@ -21,6 +21,8 @@ sonobuoy-config:
   driver: Job
   plugin-name: e2e
   result-format: junit
+  source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/windows-e2e/win-e2e-image-repo-list-master.yaml
+  description: Runs Kubernetes end-to-end tests on Windows clusters.
 spec:
   command:
     - /run_e2e.sh

@@ -2,6 +2,8 @@ sonobuoy-config:
   driver: DaemonSet
   plugin-name: systemd-logs
   result-format: raw
+  source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/systemd-logs/systemd-logs.yaml
+  description: Gathers node logs.
 spec:
   command:
   - /bin/sh
