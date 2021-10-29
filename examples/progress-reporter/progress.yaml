@@ -1,6 +1,8 @@
 sonobuoy-config:
   driver: Job
   plugin-name: progress
+  source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/examples/progress-reporter/progress.yaml
+  description: Example of how to send progress updates via Sonobuoy.
 spec:
   command:
   - ./run.sh

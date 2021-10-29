@@ -1,0 +1,39 @@
+// List of plugins exposed to user via `sonobuoy plugins list|install`
+plugins:
+  - id: e2e
+    plugin-name: e2e
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/e2e/e2e.yaml
+    description: The end-to-end tests maintained by Kubernetes to test the health of your cluster.
+  - id: systemd-logs
+    plugin-name: systemd-logs
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/systemd-logs/systemd-logs.yaml
+    description: Gathers node logs.
+  - id: win-e2e
+    plugin-name: e2e
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/windows-e2e/win-e2e-image-repo-list.yaml
+    description: Runs Kubernetes end-to-end tests on Windows clusters.
+  - id: win-e2e-2004
+    plugin-name: e2e
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/windows-e2e/win-e2e-image-repo-list-2004.yaml
+    description: Runs Kubernetes end-to-end tests on Windows clusters.
+  - id: win-e2e-master
+    plugin-name: e2e
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/windows-e2e/win-e2e-image-repo-list-master.yaml
+    description: Runs Kubernetes end-to-end tests on Windows clusters.
+examples:
+  - id: cmd-runner
+    plugin-name: cmd-runner
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/examples/cmd-runner/cmdrunner.yaml
+    description: Run a series of commands in the shell and return each result.
+  - id: e2e-skeleton
+    plugin-name: custom-e2e
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/examples/e2e-skeleton/plugin.yaml
+    description: An easy to start from project for making K8s aware tests.
+  - id: progress-reporter
+    plugin-name: progress
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/examples/progress-reporter/progress.yaml
+    description: Example of how to send progress updates via Sonobuoy.
+  - id: windows-example
+    plugin-name: windows-events
+    source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/examples/windows-plugin/plugin.yaml
+    description: Example of a plugin which runs on Windows nodes. Gathers Windows events.

@@ -1,0 +1,18 @@
+sonobuoy-config:
+  driver: Job
+  plugin-name: cmd-runner
+  result-format: raw
+  source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/examples/cmd-runner/cmdrunner.yaml
+  description: Run a series of commands in the shell and return each result.
+spec:
+  args:
+  - echo hello world
+  - kubectl cluster-info
+  command:
+  - ./run.sh
+  image: user/easy-sonobuoy-cmds:v0.1
+  name: plugin
+  resources: {}
+  volumeMounts:
+  - mountPath: /tmp/sonobuoy/results
+    name: results

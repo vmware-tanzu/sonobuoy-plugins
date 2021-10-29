@@ -18,6 +18,8 @@ sonobuoy-config:
   plugin-name: windows-events
   result-format: raw
   skip-cleanup: true
+  source_url: https://raw.githubusercontent.com/vmware-tanzu/sonobuoy-plugins/main/examples/windows-plugin/plugin.yaml
+  description: Example of a plugin which runs on Windows nodes. Gathers Windows events.
 spec:
   image: sonobuoy/windows-plugin:v1
   name: plugin
