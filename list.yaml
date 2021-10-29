@@ -1,4 +1,4 @@
-// List of plugins exposed to user via `sonobuoy plugins list|install`
+# List of plugins exposed to user via 'sonobuoy plugins list|install'
 plugins:
   - id: e2e
     plugin-name: e2e
