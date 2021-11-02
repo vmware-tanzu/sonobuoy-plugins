@@ -30,6 +30,7 @@ import (
 
 const (
 	ProgressReporterCtxKey = "SONOBUOY_PROGRESS_REPORTER"
+	NamespacePrefixKey = "NS_PREFIX"
 )
 
 var testenv env.Environment
@@ -40,7 +41,7 @@ func TestMain(m *testing.M) {
 
 	// Specifying a run ID so that multiple runs wouldn't collide. Allow a prefix to be set via env var
 	// so that a plugin configuration (yaml file) can easily set that without code changes.
-	nsPrefix := os.Getenv("NS_PREFIX")
+	nsPrefix := os.Getenv(NamespacePrefixKey)
 	runID := envconf.RandomName(nsPrefix, 4)
 
 	// Create updateReporter; will also place into context during Setup for use in features.
@@ -62,6 +63,19 @@ func TestMain(m *testing.M) {
 		return deleteNSForTest(ctx, cfg, t, runID)
 	})
 
+	/*
+	testenv.BeforeEachFeature(func(ctx context.Context, config *envconf.Config, info features.Feature) (context.Context, error) {
+		// Note that you can also add logic here for before a feature is tested. There may be
+		// more than one feature in a test.
+		return ctx, nil
+	})
+	testenv.AfterEachFeature(func(ctx context.Context, config *envconf.Config, info features.Feature) (context.Context, error) {
+		// Note that you can also add logic here for after a feature is tested. There may be
+		// more than one feature in a test.
+		return ctx, nil
+	})
+	 */
+
 	os.Exit(testenv.Run(m))
 }
 
@@ -71,7 +85,7 @@ func createNSForTest(ctx context.Context, cfg *envconf.Config, t *testing.T, run
 	ns := envconf.RandomName(runID, 10)
 	ctx = context.WithValue(ctx, nsKey(t), ns)
 
-	t.Logf("Creating NS %v for test %v", ns, t.Name())
+	t.Logf("Creating namespace %v for test %v", ns, t.Name())
 	nsObj := v1.Namespace{}
 	nsObj.Name = ns
 	return ctx, cfg.Client().Resources().Create(ctx, &nsObj)
@@ -80,7 +94,7 @@ func createNSForTest(ctx context.Context, cfg *envconf.Config, t *testing.T, run
 // DeleteNSForTest looks up the namespace corresponding to the given test and deletes it.
 func deleteNSForTest(ctx context.Context, cfg *envconf.Config, t *testing.T, runID string) (context.Context, error) {
 	ns := fmt.Sprint(ctx.Value(nsKey(t)))
-	t.Logf("Deleting NS %v for test %v", ns, t.Name())
+	t.Logf("Deleting namespace %v for test %v", ns, t.Name())
 
 	nsObj := v1.Namespace{}
 	nsObj.Name = ns

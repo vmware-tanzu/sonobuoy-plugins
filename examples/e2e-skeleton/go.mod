@@ -3,9 +3,9 @@ module github.com/vmware-tanzu/sonobuoy-plugins/examples/e2e-skeleton
 go 1.17
 
 require (
-	github.com/vmware-tanzu/sonobuoy-plugins/plugin-helper v0.0.0-20211028133515-0f9c00bfd35a
+	github.com/vmware-tanzu/sonobuoy-plugins/plugin-helper v0.0.0-20211029183731-1d6848b67eec
 	k8s.io/api v0.21.3
-	sigs.k8s.io/e2e-framework v0.0.4-0.20211025211825-1de7bfe9946b
+	sigs.k8s.io/e2e-framework v0.0.4-0.20211103134658-ebed03226136
 )
 
 require (
@@ -28,9 +28,9 @@ require (
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmware-tanzu/sonobuoy v1.11.5-prerelease.1.0.20211004145628-b633b4fefcdc // indirect
-	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781 // indirect
+	golang.org/x/net v0.0.0-20210520170846-37e1c6afe023 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
-	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
+	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 	golang.org/x/text v0.3.6 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
@@ -41,8 +41,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	k8s.io/apimachinery v0.21.3 // indirect
 	k8s.io/client-go v0.21.3 // indirect
-	k8s.io/klog/v2 v2.8.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20210305001622-591a79e4bda7 // indirect
+	k8s.io/klog/v2 v2.9.0 // indirect
+	k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e // indirect
 	k8s.io/utils v0.0.0-20210527160623-6fdb442a123b // indirect
 	sigs.k8s.io/controller-runtime v0.9.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect

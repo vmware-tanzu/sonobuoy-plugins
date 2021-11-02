@@ -8,7 +8,7 @@ spec:
   command:
   - bash
   args: ["-c","go tool test2json ./custom.test -test.v | tee ${SONOBUOY_RESULTS_DIR}/out.json ; echo ${SONOBUOY_RESULTS_DIR}/out.json > ${SONOBUOY_RESULTS_DIR}/done"]
-  image: schnake/custome2e:v0.2.0
+  image: schnake/custome2e:v0.2.1
   env:
   - name: NS_PREFIX
     value: custom

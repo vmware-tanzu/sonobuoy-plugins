@@ -52,7 +52,7 @@ func TestLongTest(t *testing.T) {
 			}
 			progressReporterVal := ctx.Value(ProgressReporterCtxKey)
 			progressReporter:=progressReporterVal.(plugin_helper.ProgressReporter)
-			for i:=0;i<10;i++{
+			for i:=0;i<5;i++{
 				time.Sleep(5*time.Second)
 				progressReporter.SendMessageAsync("Waiting for a long test...")
 			}
