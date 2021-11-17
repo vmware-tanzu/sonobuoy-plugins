@@ -1,3 +1,5 @@
+> NOTE: There was a Sonobuoy blog post walking through this plugin, its benefits, and how to use it. See: https://sonobuoy.io/plugin-starter/
+
 # Custom End-To-End (E2E) Tests
 
 This plugin is meant as a skeleton for you to grab and run with to implement your
