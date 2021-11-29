@@ -32,7 +32,7 @@ func NewSonobuoyResultsWriter(resultsDir, outputFile string) SonobuoyResultsWrit
 	return w
 }
 
-func (w SonobuoyResultsWriter) AddTest(
+func (w *SonobuoyResultsWriter) AddTest(
 	testName string,
 	result string,
 	err error,
@@ -57,7 +57,7 @@ func (w SonobuoyResultsWriter) AddTest(
 	w.Data.Items = append(w.Data.Items, i)
 }
 
-func (w SonobuoyResultsWriter) Done() error {
+func (w *SonobuoyResultsWriter) Done() error {
 	w.Data.Status = sono.AggregateStatus(w.Data.Items...)
 
 	outfile, err := os.Create(filepath.Join(w.ResultsDir, w.OutputFile))
