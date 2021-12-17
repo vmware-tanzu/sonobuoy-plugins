@@ -22,7 +22,7 @@ var(
 func main() {
 	var version string
 	var targets string
-	flag.StringVar(&version, "version", "0.5.0", "kube-bench image version to build")
+	flag.StringVar(&version, "version", "0.6.5", "kube-bench image version to build")
 	flag.StringVar(&targets, "targets", "all", "comma-separated list of build targets")
 	flag.Parse()
 
