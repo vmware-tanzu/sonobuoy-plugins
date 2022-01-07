@@ -154,11 +154,11 @@ run_kube_bench() {
     local targets="$(get_targets)"
 
     for target in $targets; do
-        kube-bench --config $config run $vb_flag --targets $target --outputfile /tmp/results/$target.xml --junit
+        kube-bench --config $config run $vb_flag --targets $target --outputfile ${SONOBUOY_RESULTS_DIR}/$target.xml --junit
     done
 
-    tar czf /tmp/results/results.tar.gz /tmp/results/*.xml
-    echo -n /tmp/results/results.tar.gz > /tmp/results/done
+    tar czf ${SONOBUOY_RESULTS_DIR}/results.tar.gz ${SONOBUOY_RESULTS_DIR}/*.xml
+    echo -n ${SONOBUOY_RESULTS_DIR}/results.tar.gz > ${SONOBUOY_RESULTS_DIR}/done
 }
 
 run_kube_bench
