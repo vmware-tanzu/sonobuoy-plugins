@@ -61,7 +61,7 @@ spec:
   name: plugin
   resources: {}
   volumeMounts:
-  - mountPath: /tmp/results
+  - mountPath: /tmp/sonobuoy/results
     name: results
   - name: var-lib-etcd
     mountPath: /var/lib/etcd
