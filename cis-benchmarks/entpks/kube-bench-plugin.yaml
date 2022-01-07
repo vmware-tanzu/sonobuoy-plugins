@@ -53,7 +53,7 @@ spec:
       value: "false"
     - name: DISTRIBUTION
       value: "entpks"
-  image: sonobuoy/kube-bench:0.5.0
+  image: sonobuoy/kube-bench:0.6.3
   name: plugin
   resources: {}
   volumeMounts:
