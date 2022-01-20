@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultOutputFileName = "manual_results.yaml"
+	defaultOutputFileName = "sonobuoy_results.yaml"
 )
 
 type SonobuoyResultsWriter struct {
@@ -57,7 +57,7 @@ func (w *SonobuoyResultsWriter) AddTest(
 	w.Data.Items = append(w.Data.Items, i)
 }
 
-func (w *SonobuoyResultsWriter) Done() error {
+func (w *SonobuoyResultsWriter) Done(writeDoneFile bool) error {
 	w.Data.Status = sono.AggregateStatus(w.Data.Items...)
 
 	outfile, err := os.Create(filepath.Join(w.ResultsDir, w.OutputFile))
@@ -68,6 +68,11 @@ func (w *SonobuoyResultsWriter) Done() error {
 
 	enc := yaml.NewEncoder(outfile)
 	defer enc.Close()
-	err = enc.Encode(w.Data)
-	return errors.Wrap(err, "error writing to results file")
+	if err := enc.Encode(w.Data); err!=nil{
+		return errors.Wrap(err, "error writing to results file")
+	}
+	if writeDoneFile{
+		return Done()
+	}
+	return nil
 }

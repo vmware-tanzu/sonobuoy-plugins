@@ -43,16 +43,19 @@ func(r *ProgressReporter) StartTest(name string){
 // StopTest will increase the tests counts and send an update message accordingly.
 func(r *ProgressReporter) StopTest(name string,failed,skipped bool, err error){
 	msg:=""
-	r.completed+=1
 	if failed{
+		// Completed count not incremented when failing tests added.
 		r.failures=append(r.failures,name)
 		msg = fmt.Sprintf("Test failed: %v",name)
 	}else if skipped{
+		r.completed+=1
 		msg = fmt.Sprintf("Test skipped: %v",name)
 	}else if err !=nil{
+		r.completed+=1
 		r.errors=append(r.errors,name)
 		msg = fmt.Sprintf("Test errored: %v %v",name,err.Error())
 	}else{
+		r.completed+=1
 		msg = fmt.Sprintf("Test completed: %v",name)
 	}
 	r.SendMessage(msg)
