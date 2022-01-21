@@ -13,6 +13,9 @@ const (
 	defaultOutputFileName = "sonobuoy_results.yaml"
 )
 
+// SonobuoyResultsWriter will keep track of result items in memory and will
+// write them to the .ResultsDir/.OutputFile. If the ResultsDir is empty,
+// the data will be dumped to stdout instead.
 type SonobuoyResultsWriter struct {
 	ResultsDir string
 	OutputFile string
@@ -60,18 +63,22 @@ func (w *SonobuoyResultsWriter) AddTest(
 func (w *SonobuoyResultsWriter) Done(writeDoneFile bool) error {
 	w.Data.Status = sono.AggregateStatus(w.Data.Items...)
 
-	outfile, err := os.Create(filepath.Join(w.ResultsDir, w.OutputFile))
-	if err != nil {
-		return errors.Wrap(err, "error creating results file")
+	out := os.Stdout
+	if len(w.ResultsDir) > 0 {
+		outfile, err := os.Create(filepath.Join(w.ResultsDir, w.OutputFile))
+		if err != nil {
+			return errors.Wrap(err, "error creating results file")
+		}
+		defer outfile.Close()
+		out = outfile
 	}
-	defer outfile.Close()
 
-	enc := yaml.NewEncoder(outfile)
+	enc := yaml.NewEncoder(out)
 	defer enc.Close()
-	if err := enc.Encode(w.Data); err!=nil{
+	if err := enc.Encode(w.Data); err != nil {
 		return errors.Wrap(err, "error writing to results file")
 	}
-	if writeDoneFile{
+	if writeDoneFile {
 		return Done()
 	}
 	return nil
