@@ -7,8 +7,10 @@ set -x
 
 results_dir="${RESULTS_DIR:-/tmp/results}"
 
+mkdir -p ${results_dir}
+
 # saveResults prepares the results for handoff to the Sonobuoy worker.
-# See: https://github.com/vmware-tanzu/sonobuoy/blob/master/docs/plugins.md
+# See: https://github.com/vmware-tanzu/sonobuoy/blob/main/site/content/docs/main/plugins.md
 saveResults() {
     cd ${results_dir}
 
