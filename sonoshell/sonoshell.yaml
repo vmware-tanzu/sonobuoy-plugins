@@ -1,0 +1,14 @@
+sonobuoy-config:
+  driver: DaemonSet
+  plugin-name: sonoshell
+  result-format: manual
+  result-files:
+  - sonoshell.yaml
+spec:
+  image: laevos/sonoshell:latest
+  name: plugin
+  resources: {}
+  volumeMounts:
+  - mountPath: /tmp/sonobuoy/results
+    name: results
+

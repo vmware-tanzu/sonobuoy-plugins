@@ -1,0 +1,14 @@
+name: test-suite-1
+tests:
+  - name: "Tests returning 0 should pass"
+    cmd: "true"
+  - name: "Tests returning nonzero should fail"
+    cmd: "false"
+  - name: "Multiline tests should pass as expected"
+    cmd: |
+      echo "this should be fine"
+      echo "the overall test should pass"
+  - name: "Multiline tests should fail as expected"
+    cmd: |
+      echo "this should fail now"
+      ls ~ | grep nonexistant_file_9
