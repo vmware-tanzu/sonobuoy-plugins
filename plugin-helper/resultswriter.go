@@ -66,8 +66,8 @@ func (w *SonobuoyResultsWriter) Done(writeDoneFile bool) error {
 
 	out := os.Stdout
 	if len(w.ResultsDir) > 0 {
-		# Ensure ResultsDir already exists
-		if err := MkdirAll(w.ResultsDir, fs.ModeDir|fs.ModePerm); err != nil {
+		// Ensure ResultsDir already exists
+		if err := os.MkdirAll(w.ResultsDir, fs.ModeDir|fs.ModePerm); err != nil {
 			return errors.Wrap(err, "error creating results directory")
 		}
 		outfile, err := os.Create(filepath.Join(w.ResultsDir, w.OutputFile))
