@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 
 	pluginhelper "github.com/vmware-tanzu/sonobuoy-plugins/plugin-helper"
 	"gopkg.in/yaml.v3"
@@ -13,8 +14,13 @@ import (
 // Delegate the parsing of the command to bash by writing the test's cmd to a tmpfile and executing that
 func (t *Test) MakeTestPairs() (pairs map[string]string) {
 	pairs = make(map[string]string)
+
+	// Ensure generated filenames don't contain special characters
+	specials := regexp.MustCompile(`\W+`)
+
 	for _, test := range t.Tests {
-		f, err := os.CreateTemp("", test.Name)
+		fname := specials.ReplaceAllString(test.Name, "_")
+		f, err := os.CreateTemp("", fname)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -30,7 +36,7 @@ func (t *Test) MakeTestPairs() (pairs map[string]string) {
 }
 
 // Execute the tests stored in the given set of name: cmd pairs and store the results
-func (results *Result) RunTests(pairs map[string]string) {
+func (results *Result) RunTests(pairs map[string]string, w *pluginhelper.SonobuoyResultsWriter) {
 	p := pluginhelper.NewProgressReporter(int64(len(pairs)))
 	for name, cmd := range pairs {
 		cur := Result{Name: name, Meta: make(map[string]string)}
@@ -42,9 +48,11 @@ func (results *Result) RunTests(pairs map[string]string) {
 		//some other error happened.
 		if err != nil {
 			cur.Status = "failed"
+			w.AddTest(name, "failed", nil, string(output))
 			p.StopTest(name, true, false, nil)
 		} else {
 			cur.Status = "passed"
+			w.AddTest(name, "passed", nil, string(output))
 			p.StopTest(name, false, false, nil)
 		}
 		log.Printf("Status of \"%s\": %s\n", name, cur.Status)
@@ -113,7 +121,8 @@ func main() {
 	results := Result{Name: testspec.Name, Meta: make(map[string]string)}
 	results.Meta["type"] = "summary"
 
-	results.RunTests(test_pairs)
+	w := pluginhelper.NewSonobuoyResultsWriter(resDir, resFile)
+	results.RunTests(test_pairs, &w)
 
 	// Write the overall status; if any tests fail, report a failure
 	results.Status = "passed"
@@ -123,7 +132,9 @@ func main() {
 		}
 	}
 
-	results.emit()
+	if err := w.Done(true); err != nil {
+		log.Fatal(err)
+	}
 	if err := pluginhelper.Done(); err != nil {
 		log.Fatal(err)
 	}
