@@ -49,15 +49,11 @@ config-map:
     ]
 sonobuoy-config:
   driver: Job
-  plugin-name: clusterquery
+  plugin-name: requirements-check
   result-format: manual
+  skip-cleanup: true
 spec:
   command:
-  - ./cluster-query
-  image: schnake/requirementscheck:v0
+  - /requirements-check
+  image: sonobuoy/requirementscheck:v0.0.1
   name: plugin
-  resources: {}
-  volumeMounts:
-  - mountPath: /tmp/results
-    name: results
-
