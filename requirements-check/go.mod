@@ -19,7 +19,7 @@ require (
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/vmware-tanzu/sonobuoy v1.11.5-prerelease.1.0.20211004145628-b633b4fefcdc
-	github.com/vmware-tanzu/sonobuoy-plugins/plugin-helper v0.0.0-20211005170758-2afc247e5224
+	github.com/vmware-tanzu/sonobuoy-plugins/plugin-helper v0.0.0-20220201185710-2cdf83c452df
 	golang.org/x/net v0.0.0-20210520170846-37e1c6afe023 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
