@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -48,54 +47,16 @@ func (results *Result) RunTests(pairs map[string]string, w *pluginhelper.Sonobuo
 		//some other error happened.
 		if err != nil {
 			cur.Status = "failed"
-			w.AddTest(name, "failed", nil, string(output))
 			p.StopTest(name, true, false, nil)
 		} else {
 			cur.Status = "passed"
-			w.AddTest(name, "passed", nil, string(output))
 			p.StopTest(name, false, false, nil)
 		}
+		w.AddTest(name, cur.Status, nil, string(output))
 		log.Printf("Status of \"%s\": %s\n", name, cur.Status)
-		// Need to put the output in the directory so that we can send it off
-		f, err := os.CreateTemp("", name)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if _, err := f.Write(output); err != nil {
-			log.Fatal(err)
-		}
-		cur.Meta["type"] = "file"
-		cur.Meta["file"] = f.Name()
 
 		results.Tests = append(results.Tests, cur)
 	}
-}
-
-// Marshal the test results to a yaml file for sonobuoy to consume
-func (results Result) emit() {
-	if err := os.MkdirAll(resDir, fs.ModeDir|fs.ModePerm); err != nil {
-		log.Fatal(err)
-	}
-	f, err := os.Create(resDir + resFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	output, err := yaml.Marshal(results)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		err := f.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	if _, err := f.Write(output); err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Wrote output to %s", f.Name())
 }
 
 func main() {
@@ -112,17 +73,14 @@ func main() {
 	if err := yaml.Unmarshal(yml, &testspec); err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Printf("---\n%v\n", testspec) // DEBUG
 
-	test_pairs := testspec.MakeTestPairs()
-
-	//fmt.Println(test_pairs) // DEBUG
+	testPairs := testspec.MakeTestPairs()
 
 	results := Result{Name: testspec.Name, Meta: make(map[string]string)}
 	results.Meta["type"] = "summary"
 
 	w := pluginhelper.NewSonobuoyResultsWriter(resDir, resFile)
-	results.RunTests(test_pairs, &w)
+	results.RunTests(testPairs, &w)
 
 	// Write the overall status; if any tests fail, report a failure
 	results.Status = "passed"

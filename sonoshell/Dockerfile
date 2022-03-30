@@ -1,11 +1,11 @@
 FROM golang:1.17-buster as build
 
-run mkdir -p /_sonoshell
-COPY ./pkg /_sonoshell/pkg
+RUN mkdir -p /_sonoshell
 COPY ./go.sum /_sonoshell/go.sum
 COPY ./go.mod /_sonoshell/go.mod
-
 WORKDIR /_sonoshell
+RUN go mod download
+COPY ./pkg /_sonoshell/pkg
 
 # Needed to build successfully
 RUN go mod tidy
