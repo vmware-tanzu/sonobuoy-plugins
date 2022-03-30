@@ -7,9 +7,6 @@ WORKDIR /_sonoshell
 RUN go mod download
 COPY ./pkg /_sonoshell/pkg
 
-# Needed to build successfully
-RUN go mod tidy
-
 RUN go build -o sonoshell ./pkg
 
 FROM debian:buster-slim
