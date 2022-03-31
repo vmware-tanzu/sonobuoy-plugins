@@ -12,6 +12,6 @@ RUN go build -o sonoshell ./pkg
 FROM debian:buster-slim
 
 COPY --from=build /_sonoshell/sonoshell /sonoshell
-COPY ./test.yaml /test.yaml
+COPY ./.test.yaml /test.yaml
 
 CMD ["/sonoshell", "/test.yaml"]

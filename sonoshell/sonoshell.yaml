@@ -14,6 +14,13 @@ config-map:
         cmd: |
           echo "this should fail now"
           ls ~ | grep nonexistant_file_9
+      - name: "Tests that fail early on should fail"
+        cmd: |
+          set -eux
+          false
+          true
+      - name: "Tests with special characters should be handled correctly /dev/🐱"
+        cmd: "true"
 sonobuoy-config:
   driver: DaemonSet
   plugin-name: sonoshell
