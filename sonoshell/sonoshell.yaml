@@ -1,0 +1,37 @@
+config-map:
+  test.yaml: |
+    name: test-suite-1
+    tests:
+      - name: "Tests returning 0 should pass"
+        cmd: "true"
+      - name: "Tests returning nonzero should fail"
+        cmd: "false"
+      - name: "Multiline tests should pass as expected"
+        cmd: |
+          echo "this should be fine"
+          echo "the overall test should pass"
+      - name: "Multiline tests should fail as expected"
+        cmd: |
+          echo "this should fail now"
+          ls ~ | grep nonexistant_file_9
+      - name: "Tests that fail early on should fail"
+        cmd: |
+          set -eux
+          false
+          true
+      - name: "Tests with special characters should be handled correctly /dev/🐱"
+        cmd: "true"
+sonobuoy-config:
+  driver: DaemonSet
+  plugin-name: sonoshell
+  result-format: manual
+  result-files:
+  - sonoshell.yaml
+spec:
+  command:
+    - ./sonoshell
+  args:
+    - "$(SONOBUOY_CONFIG_DIR)/test.yaml"
+  image: laevos/sonoshell:latest
+  name: plugin
+  resources: {}
