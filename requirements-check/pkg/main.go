@@ -19,6 +19,7 @@ const (
 	pluginInputDir   = "/tmp/sonobuoy/config"
 )
 
+
 func main() {
 	// Debug
 	logrus.SetLevel(logrus.TraceLevel)

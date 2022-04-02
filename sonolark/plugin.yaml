@@ -1,0 +1,32 @@
+config-map:
+  script.star: |-
+    def foo():
+      print("Call sonobuoy.startTest to name the current test.")
+      sonobuoy.startTest("Test #1")
+      x = 1
+      print("Any failure will automatically fail the currently running test.")
+      assert.equals(1,1,"X should be equal to %v but I got %v")
+      print("Call sonobuoy.passTest to mark the test as completed successfully.")
+      sonobuoy.passTest()
+
+    def envvars():
+      sonobuoy.startTest("Env var test")
+      print("You can set environment variables like SONOLARK_<NAME> and access them using env.<name>: " + env.foo)
+      assert.equals(env.foo, "yay", "Env var should have had the value %v but got %v")
+      sonobuoy.passTest()
+
+    print("This is an example Starlark script")
+    foo()
+    envvars()
+sonobuoy-config:
+  driver: Job
+  plugin-name: sonolark
+  result-format: manual
+spec:
+  command:
+  - ./sonolark
+  env:
+    - name: SONOLARK_FOO
+      value: yay
+  image: sonobuoy/sonolark:v0.0.1
+  name: plugin
