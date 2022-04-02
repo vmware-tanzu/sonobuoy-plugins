@@ -58,7 +58,7 @@ spec:
       value: "true"
     - name: DISTRIBUTION
       value: "gke"
-  image: sonobuoy/kube-bench:v0.6.5
+  image: sonobuoy/kube-bench:v0.6.6
   name: plugin
   resources: {}
   volumeMounts:
