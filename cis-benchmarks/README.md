@@ -60,6 +60,8 @@ Each of targets can be enabled or disabled by setting the value for the appropri
 * `TARGET_POLICIES`
   Setting this to "true" enables the checks for Kubernetes policies. For CIS 1.5, this is Section 2. This target cannot be enabled for earlier versions of the benchmark.
   This is disabled by default in both plugins.
+* `SKIP`
+   Will be passed to the `--skip` flag of kube-bench: List of comma separated values of checks to be skipped.
 
 The following environment variables are distribution specific.
 They should not be enabled unless you are running against a distribution where they are valid and compatible.

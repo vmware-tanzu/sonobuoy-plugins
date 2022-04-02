@@ -148,13 +148,25 @@ get_targets() {
     echo $targets
 }
 
+# Returns the skip flag if SKIP is not empty
+get_skip_flag() {
+    local skip_flag
+
+    if [ ! -z "$SKIP" ]; then
+        skip_flag="--skip $SKIP"
+    fi
+
+    echo $skip_flag
+}
+
 run_kube_bench() {
     local config="$(get_config)"
     local vb_flag="$(get_version_or_benchmark_flag)"
     local targets="$(get_targets)"
+    local skip_flag="$(get_skip_flag)"
 
     for target in $targets; do
-        kube-bench --config $config run $vb_flag --targets $target --outputfile ${SONOBUOY_RESULTS_DIR}/$target.xml --junit
+        kube-bench --config $config run $vb_flag --targets $target $skip_flag --outputfile ${SONOBUOY_RESULTS_DIR}/$target.xml --junit
     done
 
     tar czf ${SONOBUOY_RESULTS_DIR}/results.tar.gz ${SONOBUOY_RESULTS_DIR}/*.xml
