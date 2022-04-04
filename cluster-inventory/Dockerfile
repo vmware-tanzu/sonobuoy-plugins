@@ -1,4 +1,4 @@
-FROM golang:1.15-buster as build
+FROM golang:1.17-buster as build
 
 COPY . /cluster-inventory
 WORKDIR /cluster-inventory
