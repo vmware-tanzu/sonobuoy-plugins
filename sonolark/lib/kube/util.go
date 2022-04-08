@@ -38,7 +38,7 @@ func resourceQuantityFn(_ *starlark.Thread, b *starlark.Builtin, args starlark.T
 
 	un, err := runtime.DefaultUnstructuredConverter.ToUnstructured(q)
 	if err != nil {
-		return nil, fmt.Errorf("<%v>: failed to convert '%s' to unstructured JSON: %v", b.Name(), q, err)
+		return nil, fmt.Errorf("<%v>: failed to convert '%v' to unstructured JSON: %v", b.Name(), q, err)
 	}
 
 	return ValueFromNestedMap(un)
