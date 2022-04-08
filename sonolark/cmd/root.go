@@ -95,6 +95,8 @@ func getRootCmd(env map[string]string) *cobra.Command {
 	} else {
 		root.Flags().StringVar(&in.KubeConfigPath, "kubeconfig", "", "absolute path to the kubeconfig file")
 	}
+
+	root.AddCommand(NewCmdVersion())
 	return root
 }
 
