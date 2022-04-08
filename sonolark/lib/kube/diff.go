@@ -240,31 +240,31 @@ func printUnifiedDiff(
 
 	right, _ := renderObj(head, &gvk, true, diffFilters)
 
-	fmt.Fprintf(w, "\n*** %s ***\n", fullName)
-
-	err := difflib.WriteUnifiedDiff(w, difflib.UnifiedDiff{
+	b := new(bytes.Buffer)
+	err := difflib.WriteUnifiedDiff(b, difflib.UnifiedDiff{
 		A:        difflib.SplitLines(left),
 		B:        difflib.SplitLines(right),
-		FromFile: "first",
-		ToFile:   "second",
+		FromFile: "a",
+		ToFile:   "b",
 		Context:  5,
 		Eol:      "\n",
 	})
 	if err != nil {
 		return fmt.Errorf("failed to print diff for %s: %v", fullName, err)
 	}
+
+	if b.Len() > 0 {
+		// Only print this header for the diff if there _is_ a diff.
+		fmt.Fprintf(w, "\n*** %s ***\n", fullName)
+		io.Copy(w, b)
+	}
 	return nil
 }
 
 // kubeDiffFn is a starlark function for comparing two yaml objects for equality while excluding the keys specified by the 'ignore' keyword arg.
 func kubeDiffFn(t *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-	if args.Len() != 2 && args.Len() != 3 {
-		return starlark.None, fmt.Errorf("expected two arguments (yaml) with an optional format strin as a third argument")
-	}
-
-	errFmt := "Expected values to be equal but got diff: %v"
-	if args.Len() == 3 {
-		errFmt = args.Index(2).String()
+	if args.Len() != 2 {
+		return starlark.None, fmt.Errorf("expected two arguments (yaml)")
 	}
 
 	maybeObj := args.Index(0)
@@ -279,11 +279,10 @@ func kubeDiffFn(t *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kw
 		return nil, fmt.Errorf("item %d is not a YAML string (got: %s): %v", 1, maybeObj.Type(), err)
 	}
 
-	var buf bytes.Buffer
-	err = printUnifiedDiff(&buf, obj1, obj2, *gvk1, "", []string{})
-	if len(b.String()) > 0 {
-		return starlark.None, fmt.Errorf(errFmt, buf.String())
+	buf := bytes.NewBufferString("")
+	if err := printUnifiedDiff(buf, obj1, obj2, *gvk1, "", []string{}); err != nil {
+		return nil, fmt.Errorf("unable to diff the given values: %v", err)
 	}
 
-	return starlark.None, nil
+	return starlark.String(buf.String()), nil
 }
