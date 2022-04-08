@@ -17,11 +17,18 @@ limitations under the License.
 package assert
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/k14s/starlark-go/starlark"
+	"github.com/kylelemons/godebug/pretty"
 	"github.com/vmware-tanzu/carvel-ytt/pkg/template/core"
 	"github.com/vmware-tanzu/carvel-ytt/pkg/yamlmeta"
+)
+
+const (
+	defaultErrorMsg = "Not equal:\n\n\t\t\t(expected type: $4)\n$1\n\n(was type: $5)\n$2"
 )
 
 func NoOp(thread *starlark.Thread, f *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
@@ -44,8 +51,8 @@ func Fail(thread *starlark.Thread, f *starlark.Builtin, args starlark.Tuple, kwa
 
 // Equals is a slightly modified copy of yttlibrary.assertLibrary.Equals so we can provide our own failure message.
 func Equals(thread *starlark.Thread, f *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-	if args.Len() != 3 {
-		return starlark.None, fmt.Errorf("expected three arguments")
+	if args.Len() != 3 && args.Len() != 2 {
+		return starlark.None, fmt.Errorf("expected 2 or 3 arguments")
 	}
 
 	expected := args.Index(0)
@@ -69,7 +76,11 @@ func Equals(thread *starlark.Thread, f *starlark.Builtin, args starlark.Tuple, k
 	}
 
 	if expectedString != actualString {
-		return starlark.None, fmt.Errorf(args.Index(2).String(), args.Index(0), args.Index(1))
+		errMsg := defaultErrorMsg
+		if len(args) == 3 {
+			errMsg = args.Index(2).String()
+		}
+		return starlark.None, errors.New(getFmtStringFromArgs(errMsg, expected, actual))
 	}
 
 	return starlark.None, nil
@@ -108,4 +119,28 @@ func assertYamlEncode(goValue interface{}) (string, error) {
 	}
 
 	return string(valBs), nil
+}
+
+// getFmtStringFromArgs takes an arbitrary fmt string and replaces the values
+// $1, $2, $3, $4, and $5 with v1, v2, diff(v1, v2), v1.Type, and v2.Type respectively.
+// The keywords (e.g. $1) can be provided any number of times in any order (or not at all).
+func getFmtStringFromArgs(input string, v1, v2 starlark.Value) string {
+	// Only calc diff if necessary.
+	diff := ""
+	if i3 := strings.Index(input, "$3"); i3 >= 0 {
+		diff = pretty.Compare(v1, v2)
+	}
+
+	rep := strings.NewReplacer(
+		"$1", fmt.Sprint(v1),
+		"$2", fmt.Sprint(v2),
+		"$3", fmt.Sprint(diff),
+		"$4", v1.Type(),
+		"$5", v2.Type(),
+		`\n`, "\n",
+		`\t`, "\t",
+	)
+
+	// Run it through twice to resolve any newlines/tabs that get placed into the diff.
+	return rep.Replace(rep.Replace(input))
 }
