@@ -75,7 +75,7 @@ func getRootCmd(env map[string]string) *cobra.Command {
 				return nil
 			}
 
-			_, err = starlark.ExecFile(thread, getScriptName(env), nil, *predeclared)
+			_, err = starlark.ExecFile(thread, in.Filename, nil, *predeclared)
 			if err != nil {
 				if evalErr, ok := err.(*starlark.EvalError); ok {
 					sonobuoy.FailTest(thread, evalErr.Backtrace())
@@ -88,7 +88,7 @@ func getRootCmd(env map[string]string) *cobra.Command {
 		},
 	}
 
-	root.Flags().StringVarP(&in.Filename, "file", "f", defaultScriptName, "The name of the script to run. Assumed to be located in the SONOBUOY_CONFIG_DIR if set, a relative path otherwise.")
+	root.Flags().StringVarP(&in.Filename, "file", "f", getDefaultScriptName(env), "The name of the script to run")
 	root.Flags().Var(&in.LogLevel, "level", "The Log level. One of {panic, fatal, error, warn, info, debug, trace}")
 	if home := homedir.HomeDir(); home != "" {
 		root.Flags().StringVar(&in.KubeConfigPath, "kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")

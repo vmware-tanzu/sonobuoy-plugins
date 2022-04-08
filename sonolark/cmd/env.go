@@ -37,6 +37,6 @@ func getEnvs() map[string]string {
 	return envs
 }
 
-func getScriptName(env map[string]string) string {
+func getDefaultScriptName(env map[string]string) string {
 	return filepath.Join(env[sonobuoy.EnvKeySonobuoyConfigDir], defaultScriptName)
 }
