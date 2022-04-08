@@ -111,7 +111,7 @@ func markTestComplete(thread *starlark.Thread, failed, skipped bool, err error, 
 		testName = maybeTestName.(string)
 	}
 	if len(testName) == 0 {
-		logrus.Warn("Attempting to mark current test as complete (failed=%v skipped=%v err=%v msg=%v) but there is no currently executing test.")
+		logrus.Warnf("Attempting to mark current test as complete (failed=%v skipped=%v err=%v msg=%v) but there is no currently executing test.", failed, skipped, err, msg)
 		return
 	}
 	pw.StopTest(testName, failed, skipped, err)
@@ -215,7 +215,7 @@ func Done(thread *starlark.Thread) {
 		testName = maybeTest.(string)
 	}
 	if len(testName) > 0 {
-		logrus.Trace("Found test %q still marked as currently running. Marking it as failed.", testName)
+		logrus.Tracef("Found test %q still marked as currently running. Marking it as failed.", testName)
 		markTestComplete(thread, true, false, errors.New("suite completed while test still running"), "suite completed while test still running")
 	}
 	pw.SendMessage("Suite completed.")
