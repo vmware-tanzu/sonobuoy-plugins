@@ -9,6 +9,7 @@ require (
 	github.com/google/go-cmp v0.5.6
 	github.com/heptio/ark v0.9.11
 	github.com/k14s/starlark-go v0.0.0-20200720175618-3a5c849cc368
+	github.com/kylelemons/godebug v1.1.0
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.4.0
