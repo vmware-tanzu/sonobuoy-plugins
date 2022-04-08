@@ -10,7 +10,7 @@ COPY ./lib /src/lib
 COPY ./cmd /src/cmd
 
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    GOOS=linux GOARCH=amd64 go build -o sonolark .
+    GOOS=linux GOARCH=amd64 go generate ./... && go build -o sonolark .
 
 FROM gcr.io/distroless/static:nonroot as dist
 
