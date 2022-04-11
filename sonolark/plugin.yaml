@@ -28,5 +28,5 @@ spec:
   env:
     - name: SONOLARK_FOO
       value: yay
-  image: sonobuoy/sonolark:v0.0.1
+  image: sonobuoy/sonolark:v0.0.2
   name: plugin
