@@ -89,7 +89,6 @@ func renderObj(obj runtime.Object, gvk *schema.GroupVersionKind, renderYaml bool
 	yamlMap = filterYaml(yamlMap, "metadata", "resourceVersion")
 	yamlMap = filterYaml(yamlMap, "metadata", "creationTimestamp")
 	yamlMap = filterYaml(yamlMap, "metadata", "annotations", "kubectl.kubernetes.io/last-applied-configuration")
-	yamlMap = filterYaml(yamlMap, "status")
 
 	// apply custom diff filters
 	for i := 0; i < len(diffFilters); i++ {

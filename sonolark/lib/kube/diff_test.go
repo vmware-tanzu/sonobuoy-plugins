@@ -87,6 +87,9 @@ func TestDiff(t *testing.T) {
 						},
 					},
 				},
+				Status: corev1.PodStatus{
+					StartTime: &now,
+				},
 			},
 			wantDiff: "",
 		},
