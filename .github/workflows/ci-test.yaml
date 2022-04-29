@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  pluginTests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get Current Pull Request
+        uses: 8BitJonny/gh-get-current-pr@1.0.1
+        id: pr
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          filterOutClosed: true
+
+      - id: file_changes
+        name: File Changes
+        uses: trilom/file-changes-action@v1.2.3
+        with:
+          prNumber: ${{ steps.pr.outputs.number }}
+
+      - name: Ouput File Changes
+        run: |
+          cat $HOME/files.json
+          cat $HOME/files_modified.json
+          cat $HOME/files_added.json
+          cat $HOME/files_removed.json
+          echo 'files: ${{ steps.file_changes.outputs.files}}'
+          echo 'modified: ${{ steps.file_changes.outputs.files_modified}}'
+          echo 'added: ${{ steps.file_changes.outputs.files_added}}'
+          echo 'removed: ${{ steps.file_changes.outputs.files_removed}}'
+
+      - name: Run sonolark "build"
+        run: cd ./sonolark && make test
+        if: contains(steps.file_changes.outputs.files , '"sonolark/')

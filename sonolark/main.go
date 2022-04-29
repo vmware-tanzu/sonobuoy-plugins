@@ -19,5 +19,6 @@ package main
 import "github.com/vmware-tanzu/sonobuoy-plugins/sonolark/cmd"
 
 func main() {
+	//diff for testing
 	cmd.Execute()
 }
