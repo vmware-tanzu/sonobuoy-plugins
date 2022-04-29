@@ -12,7 +12,7 @@ build_image: generate ## Builds the docker image
 	@echo "Building docker image..."
 	docker build -t $(DOCKER_REGISTRY)/sonolark:$(TAG) .
 
-test: ## Runs go tests
+test: clean generate ## Runs go tests
 	@echo "Running go test ./..."
 	go test ./...
 
