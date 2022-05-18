@@ -14,7 +14,6 @@ COPY go.mod /src/go.mod
 WORKDIR /src
 RUN go mod download
 
-COPY ./pkg /src/pkg
 COPY ./cmd /src/cmd
 COPY main.go /src/main.go
 RUN go build -o binary
