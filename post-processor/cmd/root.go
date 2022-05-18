@@ -53,9 +53,12 @@ func getRootCmd() *cobra.Command {
 
 			// First we have to convert to the common yaml format.
 			// WIP just assuming junit and hardcoding the conversion
-			pName := "myplugin"
+			pName := "tmp-postprocessing-name"
 			format := "junit"
 
+			// TODO(johnschnake): I think we should be able to call into a higher level function to process different
+			// formats and automatically be more robust. TBD. It needs to just know the format the plugin was providing
+			// here, but we'd ultimately end up sending out manual results.
 			m := manifest.Manifest{SonobuoyConfig: manifest.SonobuoyConfig{PluginName: pName, Driver: "job", ResultFormat: format}}
 			p := job.NewPlugin(m, "", "", "", "", nil)
 			items, err:=results.ProcessDir(p,"", dir, results.JunitProcessFile, results.FileOrExtension([]string{}, ".xml"))
@@ -68,15 +71,16 @@ func getRootCmd() *cobra.Command {
 			}
 
 			// Save existing yaml so we can apply ytt transform to it.
-			results := results.Item{
+			output := results.Item{
 				Name:     p.GetName(),
 				Metadata: map[string]string{results.MetadataTypeKey: results.MetadataTypeSummary},
 			}
 
-			results.Items = append(results.Items, items...)
-			SaveYAML(results)
+			output.Items = append(output.Items, items...)
+			output.Status=results.AggregateStatus(output.Items...)
+			SaveYAML(output)
 
-			// now shell out to ytt
+			// Now shell out to ytt.
 			c := exec.Command("/usr/bin/ytt","--debug","--dangerous-allow-all-symlink-destinations", fmt.Sprintf("-f=%v/sonobuoy_results.yaml",ph.GetResultsDir()),fmt.Sprintf("-f=%v/ytt-transform.yaml", os.Getenv("SONOBUOY_CONFIG_DIR")),fmt.Sprintf("--output-files=%v", ph.GetResultsDir()))
 			b,err := c.CombinedOutput()
 			if err != nil {
