@@ -58,20 +58,23 @@ func getRootCmd() *cobra.Command {
 
 			m := manifest.Manifest{SonobuoyConfig: manifest.SonobuoyConfig{PluginName: pName, Driver: "job", ResultFormat: format}}
 			p := job.NewPlugin(m, "", "", "", "", nil)
-			is, err:=results.ProcessDir(p,"", dir, results.JunitProcessFile, results.FileOrExtension([]string{}, ".xml"))
+			items, err:=results.ProcessDir(p,"", dir, results.JunitProcessFile, results.FileOrExtension([]string{}, ".xml"))
 			if err != nil {
 				logrus.Errorf("Error processing plugin %v: %v", p.GetName(), err)
 				return err
 			}
-			if len(is)==0{
+			if len(items)==0{
 				return errors.New("did not get any results when processing results")
-			}else if len(is)>1{
-				logrus.Warnf("SCHNAKE TODO Got more than one item from post-processing, not sure if that is expected")
 			}
 
 			// Save existing yaml so we can apply ytt transform to it.
-			logrus.Tracef("got items %#v",is[0])
-			SaveYAML(is[0])
+			results := results.Item{
+				Name:     p.GetName(),
+				Metadata: map[string]string{results.MetadataTypeKey: results.MetadataTypeSummary},
+			}
+
+			results.Items = append(results.Items, items...)
+			SaveYAML(results)
 
 			// now shell out to ytt
 			c := exec.Command("/usr/bin/ytt","--debug","--dangerous-allow-all-symlink-destinations", fmt.Sprintf("-f=%v/sonobuoy_results.yaml",ph.GetResultsDir()),fmt.Sprintf("-f=%v/ytt-transform.yaml", os.Getenv("SONOBUOY_CONFIG_DIR")),fmt.Sprintf("--output-files=%v", ph.GetResultsDir()))
