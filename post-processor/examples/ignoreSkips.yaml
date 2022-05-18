@@ -1,32 +1,76 @@
+config-map:
+  ytt-transform.yaml: |
+    #@ load("@ytt:overlay", "overlay")
+    #@overlay/match by=overlay.all
+    #@overlay/match-child-defaults expects="0+"
+    ---
+    items:
+      #@overlay/match by=overlay.all
+      - items:
+          #@overlay/match by=overlay.all
+          - items:
+            #@overlay/match by=overlay.subset({"status": "skipped"})
+            #@overlay/remove
+            - name: foo
+              status: skipped
 podSpec:
   containers:
     - name: postprocessing
       image: schnake/postprocessor:v0
-      command: postprocessor
-      args: ["--ignore-skipped"]
+      command: ["/sonobuoy-processor"]
+  nodeSelector:
+    kubernetes.io/os: linux
   restartPolicy: Never
   serviceAccountName: sonobuoy-serviceaccount
+  tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+    operator: Exists
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - key: kubernetes.io/e2e-evict-taint-key
+    operator: Exists
 sonobuoy-config:
   driver: Job
-  plugin-name: outputgen
-  result-format: junit
+  plugin-name: e2e-0
+  result-format: manual
+  description: Runs a dry-run of the e2e tests in parallel. Removes all the skipped tests from the results for easier consumption.
 spec:
   command:
-  - /bin/sh
-  args: ["-c","mkdir -p ${SONOBUOY_RESULTS_DIR} && find /tmp/sonobuoy && echo pluginoutput > ${SONOBUOY_RESULTS_DIR}/output"]
+  - /run_e2e.sh
   env:
+  - name: E2E_DRYRUN
+    value: "true"
+  - name: E2E_EXTRA_ARGS
+    value: --progress-report-url=http://localhost:8099/progress
+  - name: E2E_FOCUS
+    value: \[sig-api-machinery\] AdmissionWebhook \[Privileged:ClusterAdmin\] listing
+      mutating webhooks should work \[Conformance\]|\[sig-api-machinery\] AdmissionWebhook
+      \[Privileged:ClusterAdmin\] listing validating webhooks should work \[Conformance\]|\[sig-api-machinery\]
+      AdmissionWebhook \[Privileged:ClusterAdmin\] patching/updating a mutating webhook
+      should work \[Conformance\]|\[sig-api-machinery\] AdmissionWebhook \[Privileged:ClusterAdmin\]
+      patching/updating a validating webhook should work \[Conformance\]|\[sig-api-machinery\]
+      AdmissionWebhook \[Privileged:ClusterAdmin\] should be able to deny attaching
+      pod \[Conformance\]
+  - name: E2E_PARALLEL
+    value: "true"
+  - name: E2E_USE_GO_RUNNER
+    value: "true"
+  - name: RESULTS_DIR
+    value: /tmp/sonobuoy/results
   - name: SONOBUOY
     value: "true"
   - name: SONOBUOY_CONFIG_DIR
     value: /tmp/sonobuoy/config
   - name: SONOBUOY_K8S_VERSION
-    value: v1.20.0
+    value: v1.23.3
+  - name: SONOBUOY_PROGRESS_PORT
+    value: "8099"
   - name: SONOBUOY_RESULTS_DIR
     value: /tmp/sonobuoy/results
-  image: busybox:latest
+  image: k8s.gcr.io/conformance:v1.23.3
   imagePullPolicy: IfNotPresent
-  name: plugin
-  resources: {}
+  name: e2e
   volumeMounts:
   - mountPath: /tmp/sonobuoy/results
     name: results
