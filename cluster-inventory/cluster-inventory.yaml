@@ -31,7 +31,7 @@ spec:
     - /cluster-inventory run --sonobuoy-report $(SONOBUOY_RESULTS_DIR)/sonobuoy_results.yaml --json-report $(SONOBUOY_RESULTS_DIR)/json_results.json;
       tar czvf $(SONOBUOY_RESULTS_DIR)/results.tar.gz -C $(SONOBUOY_RESULTS_DIR)/ .;
       echo -n $(SONOBUOY_RESULTS_DIR)/results.tar.gz > $(SONOBUOY_RESULTS_DIR)/done
-  image: sonobuoy/cluster-inventory:v0.0.2
+  image: sonobuoy/cluster-inventory:v0.0.4
   name: plugin
   resources: {}
   volumeMounts:
