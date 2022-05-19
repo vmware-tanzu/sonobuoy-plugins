@@ -3,7 +3,7 @@ module github.com/vmware-tanzu/sonobuoy-plugins/cluster-inventory
 go 1.17
 
 require (
-	github.com/containernetworking/cni v0.7.1
+	github.com/containernetworking/cni v0.8.1
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v1.0.0
