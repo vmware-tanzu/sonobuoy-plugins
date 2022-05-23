@@ -17,8 +17,6 @@ podSpec:
     - name: postprocessing
       image: schnake/postprocessor:v0
       command: ["/sonobuoy-processor"]
-#      command: ["sleep"]
-#      args: ["36000"]
   nodeSelector:
     kubernetes.io/os: linux
   restartPolicy: Never

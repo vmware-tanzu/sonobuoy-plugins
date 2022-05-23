@@ -1,6 +1,7 @@
 config-map:
   ytt-transform.yaml: |
     #@ load("@ytt:overlay", "overlay")
+
     #@overlay/match by=overlay.all
     #@overlay/match-child-defaults expects="0+"
     ---
@@ -11,8 +12,28 @@ config-map:
           - items:
             #@overlay/match by=overlay.subset({"status": "skipped"})
             #@overlay/remove
-            - name: foo
-              status: skipped
+            -
+
+    #@overlay/match by=overlay.all, expects="1+"
+    ---
+    items:
+      #! file
+      #@overlay/match by=overlay.all, expects="1+"
+      -
+        items:
+        #! suite
+        #@overlay/match by=overlay.subset({"name":"Kubernetes e2e suite"}), expects="0+"
+        #@overlay/match by=lambda k,left,right: len(left["items"])==0, expects="0+"
+        #@overlay/remove
+        -
+
+    #@overlay/match by=overlay.all, expects="1+"
+    ---
+    items:
+      #! file
+      #@overlay/match by=lambda k,left,right: len(left["items"])==0, expects="0+"
+      #@overlay/remove
+      -
 podSpec:
   containers:
     - name: postprocessing
@@ -32,9 +53,9 @@ podSpec:
     operator: Exists
 sonobuoy-config:
   driver: Job
-  plugin-name: e2e-noskips
+  plugin-name: e2e-noskips-parallel
   result-format: manual
-  description: Runs a dry-run of the e2e tests. Removes all the skipped tests from the results for easier consumption.
+  description: Runs a dry-run of the e2e tests in parallel. Removes all the skipped tests and empty files/suites from the results for easier consumption.
 spec:
   command:
   - /run_e2e.sh
@@ -52,6 +73,8 @@ spec:
       patching/updating a validating webhook should work \[Conformance\]|\[sig-api-machinery\]
       AdmissionWebhook \[Privileged:ClusterAdmin\] should be able to deny attaching
       pod \[Conformance\]
+  - name: E2E_PARALLEL
+    value: "true"
   - name: E2E_USE_GO_RUNNER
     value: "true"
   - name: RESULTS_DIR
