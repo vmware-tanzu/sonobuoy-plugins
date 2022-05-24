@@ -1,4 +1,4 @@
-FROM golang:1.17.0 AS build
+FROM golang:1.17.10 AS build
 
 WORKDIR /go/src/github.com/vmware-tanzu/sonobuoy-plugins/reliability-scanner
 
