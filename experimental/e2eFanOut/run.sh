@@ -12,6 +12,8 @@ results_dir="${RESULTS_DIR:-/tmp/sonobuoy/results}"
 # More buckets mean fewer tests at once which is slower but puts less load on server.
 num_buckets="${NUM_BUCKETS:-5}"
 stop_at_bucket="${STOP_AFTER_BUCKET:-$num_buckets}"
+SONOBUOY_IMAGE="${SONOBUOY_IMAGE:-projects.registry.vmware.com/sonobuoy/sonobuoy:v0.56.6}"
+E2E_DRYRUN="${E2E_DRYRUN:-false}"
 
 mkdir -p ${results_dir}
 
@@ -91,10 +93,9 @@ EOF
 
 i=0
 while read -r line; do
-    #echo $line
     line="$(echo $line | sed 's/|*$//')"
     let bucket=i%num_buckets
-    sonobuoy gen plugin e2e --e2e-focus="${line}" --e2e-skip= --plugin-env=e2e.E2E_PARALLEL=true --plugin-env=e2e.E2E_DRYRUN=true | sed "s/plugin-name: e2e/plugin-name: e2e-"${i}"/" > ./tmpPlugins/bucket${bucket}/plugin-$i.yaml
+    sonobuoy gen plugin e2e --e2e-focus="${line}" --e2e-skip= --plugin-env=e2e.E2E_PARALLEL=true --plugin-env=e2e.E2E_DRYRUN="${E2E_DRYRUN}" | sed "s/plugin-name: e2e/plugin-name: e2e-"${i}"/" > ./tmpPlugins/bucket${bucket}/plugin-$i.yaml
     cat prefixFile > tmpfile
 
     # Plugin for e2e starts with podspec and empty containers; we are redefining that in the prefix so remove those 2 lines.
@@ -109,7 +110,7 @@ rm tmptestlist
 for (( c=0; c<stop_at_bucket; c++ ))
 do
   rm -rf ./tmpdir
-  sonobuoy run -p ./tmpPlugins/bucket${c} --wait -n sonobuoy-iterative-bucket-${c}
+  sonobuoy run --sonobuoy-image="${SONOBUOY_IMAGE}" -p ./tmpPlugins/bucket${c} --wait -n sonobuoy-iterative-bucket-${c}
   sonobuoy retrieve -x tmpdir -n sonobuoy-iterative-bucket-${c}
 
   # Output status to help with debug
