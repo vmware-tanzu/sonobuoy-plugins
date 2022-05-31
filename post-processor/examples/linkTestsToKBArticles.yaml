@@ -1,0 +1,128 @@
+config-map:
+  ytt-transform.yaml: |
+    #@ load("@ytt:overlay", "overlay")
+
+    #@overlay/match by=overlay.all
+    #@overlay/match-child-defaults expects="0+"
+    ---
+    #! This section matches a number of different failures and adds information into their failure object.
+    items:
+      #@overlay/match by=overlay.all
+      - items:
+          #@overlay/match by=overlay.all
+          - items:
+
+            #! This section will APPEND to the summary field, regardless of the test status.
+            #@overlay/match by=overlay.map_key("name")
+            #@overlay/merge
+            - name: '[sig-node] Pods should be submitted and removed [NodeConformance] [Conformance]'
+              details:
+                #! Here we append to the 'failure' field.
+                #@overlay/replace via=lambda left, right: left+"\n"+right
+                summary: 'See our KB article www.example.com to understand more.'
+
+            #! This section will REPLACE to the summary field regardless of the test status.
+            #@overlay/match by=overlay.map_key("name")
+            #@overlay/merge
+            - name: '[sig-api-machinery] AdmissionWebhook [Privileged:ClusterAdmin] should be able to deny attaching pod [Conformance]'
+              details:
+                #@overlay/replace via=lambda left, right: right
+                summary: 'See our KB article www.example.com to understand more.'
+
+            #! This section will APPEND to the 'failure' field but only if it failed. This avoids commenting on passing tests.
+            #@overlay/match by=overlay.subset({"name":"testname","status": "failed"})
+            - name: 'testname'
+              details:
+                #@overlay/replace via=lambda left, right: left+"\n"+right
+                failure: 'See our KB article www.example.com to understand more.'
+
+    #! This section removes skipped tests.
+    #@overlay/match by=overlay.all
+    #@overlay/match-child-defaults expects="0+"
+    ---
+    items:
+      #@overlay/match by=overlay.all
+      - items:
+          #@overlay/match by=overlay.all
+          - items:
+            #@overlay/match by=overlay.subset({"status": "skipped"})
+            #@overlay/remove
+            -
+
+    #! Now that skipped tests are removed, its possible (when running in parallel) to have emptry test suite entries. Remove those.
+    #@overlay/match by=overlay.all, expects="1+"
+    ---
+    items:
+      #! file
+      #@overlay/match by=overlay.all, expects="1+"
+      -
+        items:
+        #! suite
+        #@overlay/match by=overlay.subset({"name":"Kubernetes e2e suite"}), expects="0+"
+        #@overlay/match by=lambda k,left,right: len(left["items"])==0, expects="0+"
+        #@overlay/remove
+        -
+
+    #! Now that skipped tests are removed, its possible (when running in parallel) to have "file" entries. Remove those.
+    #@overlay/match by=overlay.all, expects="1+"
+    ---
+    items:
+      #! file
+      #@overlay/match by=lambda k,left,right: len(left["items"])==0, expects="0+"
+      #@overlay/remove
+      -
+podSpec:
+  containers:
+    - name: postprocessing
+      image: schnake/postprocessor:v0
+      command: ["/sonobuoy-processor"]
+  nodeSelector:
+    kubernetes.io/os: linux
+  restartPolicy: Never
+  serviceAccountName: sonobuoy-serviceaccount
+  tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+    operator: Exists
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - key: kubernetes.io/e2e-evict-taint-key
+    operator: Exists
+sonobuoy-config:
+  driver: Job
+  plugin-name: e2ewithlinks
+  result-format: manual
+spec:
+  command:
+  - /run_e2e.sh
+  env:
+  - name: E2E_DRYRUN
+    value: "true"
+  - name: E2E_EXTRA_ARGS
+    value: --progress-report-url=http://localhost:8099/progress
+  - name: E2E_FOCUS
+    value: \[Conformance\]
+  - name: E2E_PARALLEL
+    value: "false"
+  - name: E2E_SKIP
+    value: \[Disruptive\]|NoExecuteTaintManager
+  - name: E2E_USE_GO_RUNNER
+    value: "true"
+  - name: RESULTS_DIR
+    value: /tmp/sonobuoy/results
+  - name: SONOBUOY
+    value: "true"
+  - name: SONOBUOY_CONFIG_DIR
+    value: /tmp/sonobuoy/config
+  - name: SONOBUOY_K8S_VERSION
+    value: v1.23.3
+  - name: SONOBUOY_PROGRESS_PORT
+    value: "8099"
+  - name: SONOBUOY_RESULTS_DIR
+    value: /tmp/sonobuoy/results
+  image: k8s.gcr.io/conformance:v1.23.3
+  imagePullPolicy: IfNotPresent
+  name: e2e
+  volumeMounts:
+  - mountPath: /tmp/sonobuoy/results
+    name: results
