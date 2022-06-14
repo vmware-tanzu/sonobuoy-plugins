@@ -34,6 +34,7 @@ import (
 	"k8s.io/client-go/util/homedir"
 
 	"github.com/k14s/starlark-go/starlark"
+	nethttp "github.com/pcj/starlark-go-nethttp"
 	"github.com/vmware-tanzu/carvel-ytt/pkg/yttlibrary"
 	"github.com/vmware-tanzu/sonobuoy-plugins/sonolark/lib/kube"
 	"k8s.io/client-go/discovery"
@@ -120,6 +121,8 @@ func getLibraryFuncs(kubeconfigPath string, currentEnv map[string]string) (*star
 		"module":  yttlibrary.ModuleAPI["module"],
 		"overlay": overlay.API["overlay"],
 		"version": yttlibrary.VersionAPI["version"],
+
+		"http": toStarlarkModule(nethttp.NewModule()),
 	}
 
 	// Custom overrides so that we can make custom error messages.
