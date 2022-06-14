@@ -21,6 +21,7 @@ type ProgressReporter struct {
 	failures, errors []string
 	c                *http.Client
 	port             string
+	disabled         bool
 }
 
 // NewProgressReporter will initialize a progress reporter which expects the given number of tests. If
@@ -29,10 +30,12 @@ func NewProgressReporter(total int64) ProgressReporter {
 	progressPort := os.Getenv(SonobuoyProgressPortEnvKey)
 	if progressPort == "" {
 		logrus.Tracef("No %v env var set; no progress updates will be sent.", SonobuoyProgressPortEnvKey)
-		return ProgressReporter{}
+		return ProgressReporter{
+			disabled: true,
+		}
 	}
 	logrus.Tracef("ProgressReporter created with %v total tests expected. Will send requests to localhost:%v", total, progressPort)
-	return ProgressReporter{total: total, c: &http.Client{Timeout: 30 * time.Second}, port: progressPort}
+	return ProgressReporter{total: total, c: &http.Client{Timeout: 30 * time.Second}, port: progressPort, disabled: false}
 }
 
 // StartTest will send a progress update indicating the start of the given test.
@@ -65,7 +68,9 @@ func (r *ProgressReporter) StopTest(name string, failed, skipped bool, err error
 // use SendMessageAsync for an asynchronous call.
 func (r *ProgressReporter) SendMessage(msg string) error {
 	if r.c == nil {
-		logrus.Warnln("Progress update attempted but no client available.")
+		if !r.disabled {
+			logrus.Warnln("Progress update attempted but no client available.")
+		}
 		return nil
 	}
 
