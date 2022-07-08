@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -64,7 +65,7 @@ func (runner *Runner) BuildReport(cc int, name string) *Report {
 
 // WriteReport writes a Report out to a path on disk
 func (runner *Runner) WriteReport(report *Report, path string) error {
-	resultsFilepath := "/tmp/results/done"
+	resultsFilepath := os.Getenv("SONOBUOY_RESULTS_DIR")
 
 	runner.Logger.WithFields(log.Fields{
 		"component": "runner",
