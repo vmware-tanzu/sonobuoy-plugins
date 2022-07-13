@@ -19,6 +19,7 @@
 package kube
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -26,6 +27,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -44,6 +46,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/portforward"
+	"k8s.io/client-go/transport/spdy"
 	"sigs.k8s.io/yaml"
 )
 
@@ -58,6 +63,7 @@ type kubePackage struct {
 	dClient     discovery.DiscoveryInterface
 	dynClient   dynamic.Interface
 	httpClient  *http.Client
+	config      *rest.Config
 	dryRun      bool
 	force       bool
 	diff        bool
@@ -94,6 +100,7 @@ func New(
 	d discovery.DiscoveryInterface,
 	dynC dynamic.Interface,
 	c *http.Client,
+	config *rest.Config,
 	dryRun, force, diff bool,
 	diffFilters []string,
 ) starlark.StringDict {
@@ -102,6 +109,7 @@ func New(
 		dClient:     d,
 		dynClient:   dynC,
 		httpClient:  c,
+		config:      config,
 		Master:      addr,
 		dryRun:      dryRun,
 		force:       force,
@@ -121,6 +129,7 @@ func New(
 				kubeFromStrMethod:          starlark.NewBuiltin("kube."+kubeFromStrMethod, fromStringFn),
 				kubeFromIntMethod:          starlark.NewBuiltin("kube."+kubeFromIntMethod, fromIntFn),
 				kubeDiffMethod:             starlark.NewBuiltin("kube."+kubeDiffMethod, kubeDiffFn),
+				kubePortForwardMethod:      starlark.NewBuiltin("kube."+kubePortForwardMethod, pkg.kubePortForwardTestFn),
 			},
 		},
 	}
@@ -136,6 +145,7 @@ const (
 	kubePutYamlMethod          = "put_yaml"
 	kubeResourceQuantityMethod = "resource_quantity"
 	kubeDiffMethod             = "diff"
+	kubePortForwardMethod      = "portforward"
 )
 
 // setMetadata sets metadata fields on the obj.
@@ -730,4 +740,84 @@ func (m *kubePackage) kubeGet(ctx context.Context, r *apiResource, wait time.Dur
 	}
 
 	// not reachable
+}
+
+func (m *kubePackage) kubePortForwardTestFn(t *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+	var namespace, pod, testPath string
+	var localPort, podPort int
+	unpacked := []interface{}{
+		"namespace", &namespace,
+		"pod", &pod,
+		"local_port", &localPort,
+		"pod_port", &podPort,
+		"test_path", &testPath,
+	}
+	if err := starlark.UnpackArgs(b.Name(), args, kwargs, unpacked...); err != nil {
+		return starlark.False, fmt.Errorf("<%v>: %v", b.Name(), err)
+	}
+
+	// check if test path is already reachable before port forward
+	testUrl := fmt.Sprintf("http://localhost:%v%v", localPort, testPath)
+
+	req, err := http.NewRequest(http.MethodGet, testUrl, nil)
+	if err != nil {
+		return starlark.False, err
+	}
+
+	ctx := t.Local(addon.GoCtxKey).(context.Context)
+	_, err = m.httpClient.Do(req.WithContext(ctx))
+	if err == nil {
+		return starlark.False, fmt.Errorf("endpoint %v already in use", testUrl)
+	}
+
+	// port forward the pod
+	roundTripper, upgrader, err := spdy.RoundTripperFor(m.config)
+	if err != nil {
+		return starlark.False, err
+	}
+
+	portForwardPath := fmt.Sprintf("/api/v1/namespaces/%v/pods/%v/portforward", namespace, pod)
+
+	host := strings.Replace(m.Master, "https://", "", 1)
+	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: roundTripper}, http.MethodPost, &url.URL{Scheme: "https", Path: portForwardPath, Host: host})
+
+	var errorBuffer, outBuffer bytes.Buffer
+	errorWriter := bufio.NewWriter(&errorBuffer)
+	outWriter := bufio.NewWriter(&outBuffer)
+
+	var readyChannel chan struct{}
+	portForwardStopChannel := make(chan struct{})
+
+	portForward, err := portforward.New(dialer, []string{fmt.Sprintf("%d:%d", localPort, podPort)}, portForwardStopChannel, readyChannel, outWriter, errorWriter)
+	if err != nil {
+		return starlark.False, err
+	}
+
+	go func() {
+		err = portForward.ForwardPorts()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	defer close(portForwardStopChannel)
+
+	// check if endpoint is accessible after short delay
+	time.Sleep(time.Millisecond * 125)
+
+	var returnErr error
+	for retries := 0; retries < 5; retries++ {
+		resp, err := m.httpClient.Do(req.WithContext(ctx))
+		if err != nil {
+			time.Sleep(time.Duration(retries+1) * time.Second)
+			continue
+		}
+
+		if resp.StatusCode < 400 || resp.StatusCode >= 500 {
+			return starlark.True, nil
+		}
+
+		returnErr = fmt.Errorf("unable to reach service at url %v received status code %v (%v)", testUrl, resp.StatusCode, resp.Status)
+	}
+
+	return starlark.False, returnErr
 }

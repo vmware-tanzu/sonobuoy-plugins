@@ -140,7 +140,7 @@ func getLibraryFuncs(kubeconfigPath string, currentEnv map[string]string) (*star
 	if err != nil {
 		return nil, err
 	}
-	predeclared["kube"] = kube.New(c.Host, dC, dynC, &http.Client{Transport: t}, true, false, false, ignoreDiffFields)["kube"]
+	predeclared["kube"] = kube.New(c.Host, dC, dynC, &http.Client{Transport: t}, c, true, false, false, ignoreDiffFields)["kube"]
 
 	return &predeclared, nil
 }
