@@ -522,6 +522,7 @@ func NewFake(force bool) (m starlark.StringDict, closeFn func(), err error) {
 		fakeDiscovery(),
 		dynamic.NewForConfigOrDie(rConf),
 		&http.Client{Transport: t},
+		rConf,
 		false, /* dryRun */
 		force,
 		false, /* diff */
