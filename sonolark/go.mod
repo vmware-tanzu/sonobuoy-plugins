@@ -16,13 +16,14 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/vmware-tanzu/carvel-ytt v0.40.1
 	github.com/vmware-tanzu/sonobuoy-plugins/plugin-helper v0.0.0-20220201185710-2cdf83c452df
+	go.starlark.net v0.0.0-20220302181546-5411bad688d1
 	gopkg.in/yaml.v2 v2.4.0
 	istio.io/client-go v1.9.0
-	k8s.io/api v0.22.1
+	k8s.io/api v0.22.2
 	k8s.io/apiextensions-apiserver v0.22.1
-	k8s.io/apimachinery v0.22.1
+	k8s.io/apimachinery v0.22.2
 	k8s.io/autoscaler v0.0.0-20190828145315-8ac6134ecf96
-	k8s.io/client-go v0.22.1
+	k8s.io/client-go v0.22.2
 	k8s.io/kube-aggregator v0.0.0-20191015220746-1fa97e0b871d
 	sigs.k8s.io/yaml v1.2.0
 )
@@ -48,7 +49,6 @@ require (
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmware-tanzu/sonobuoy v1.11.5-prerelease.1.0.20211004145628-b633b4fefcdc // indirect
-	go.starlark.net v0.0.0-20220302181546-5411bad688d1 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
@@ -63,6 +63,6 @@ require (
 	istio.io/gogo-genproto v0.0.0-20190930162913-45029607206a // indirect
 	k8s.io/klog/v2 v2.9.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e // indirect
-	k8s.io/utils v0.0.0-20210707171843-4b05e18ac7d9 // indirect
+	k8s.io/utils v0.0.0-20210819203725-bdf08cb9a70a // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 )
