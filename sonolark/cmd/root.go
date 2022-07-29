@@ -73,7 +73,7 @@ func getRootCmd(env map[string]string) *cobra.Command {
 
 			predeclared, err := getLibraryFuncs(in.KubeConfigPath, env)
 			if err != nil {
-				return nil
+				return err
 			}
 
 			_, err = starlark.ExecFile(thread, in.Filename, nil, *predeclared)

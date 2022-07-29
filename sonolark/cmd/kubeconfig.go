@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -60,6 +61,7 @@ func Execute() {
 	logrus.SetLevel(logrus.TraceLevel)
 	err := getRootCmd(getEnvs()).Execute()
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
