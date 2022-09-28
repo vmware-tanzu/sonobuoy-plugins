@@ -6,10 +6,10 @@ spec:
   command:
   - /bin/sh
   - -c
-  - "python kube-hunter.py --pod --report=json | tee /tmp/results/report.json && echo -n /tmp/results/report.json > /tmp/results/done"
+  - "python kube-hunter.py --pod --report=json | tee $(SONOBUOY_RESULTS_DIR)/report.json && echo -n $(SONOBUOY_RESULTS_DIR)/report.json > $(SONOBUOY_RESULTS_DIR)/done"
   image: sonobuoy/kube-hunter:v0.2.0
   name: plugin
   resources: {}
   volumeMounts:
-  - mountPath: /tmp/results
+  - mountPath: $(SONOBUOY_RESULTS_DIR)
     name: results
