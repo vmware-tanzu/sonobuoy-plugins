@@ -1,14 +1,14 @@
 package main
 
 import (
-	"os"
 	"log"
+	"os"
+
 	"github.com/urfave/cli/v2"
 )
 
 var (
 	reportName = "reliability-scanner"
-	filePath   = "/tmp/results/reliability.yaml"
 )
 
 func main() {

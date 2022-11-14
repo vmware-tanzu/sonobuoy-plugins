@@ -55,7 +55,7 @@ func scan() {
 
 	runner.Run()
 	report := runner.BuildReport(len(c.Checks), reportName)
-	err = runner.WriteReport(report, filePath)
+	err = runner.WriteReport(report, os.Getenv("SONOBUOY_RESULTS_DIR"))
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)

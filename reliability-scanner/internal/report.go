@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -65,23 +64,23 @@ func (runner *Runner) BuildReport(cc int, name string) *Report {
 
 // WriteReport writes a Report out to a path on disk
 func (runner *Runner) WriteReport(report *Report, path string) error {
-	resultsFilepath := os.Getenv("SONOBUOY_RESULTS_DIR")
-
+	signalPath := path + "/done"
+	resultsPath := path + "/reliability.yaml"
 	runner.Logger.WithFields(log.Fields{
 		"component": "runner",
 		"phase":     "report",
-	}).Info(fmt.Sprintf("writing to %s\n", resultsFilepath))
+	}).Info(fmt.Sprintf("writing results to %s\n", path))
 
 	out, err := yaml.Marshal(report)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(path, out, 0644)
+	err = ioutil.WriteFile(resultsPath, out, 0644)
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(resultsFilepath, []byte(path), 0644)
+	err = ioutil.WriteFile(signalPath, []byte(resultsPath), 0644)
 	if err != nil {
 		return err
 	}
