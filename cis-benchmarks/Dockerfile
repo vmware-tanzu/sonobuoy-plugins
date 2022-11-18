@@ -1,4 +1,4 @@
-FROM aquasec/kube-bench:v0.6.10
+FROM aquasec/kube-bench:0.6.10
 
 COPY entpks/config.yaml cfg/entpks.yaml
 

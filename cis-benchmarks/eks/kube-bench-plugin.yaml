@@ -58,7 +58,7 @@ spec:
       value: "true"
     - name: DISTRIBUTION
       value: "eks"
-  image: sonobuoy/kube-bench:v0.6.10
+  image: sonobuoy/kube-bench:0.6.10
   name: plugin
   resources: {}
   volumeMounts:
