@@ -57,7 +57,7 @@ spec:
       value: "false"
     - name: TARGET_POLICIES
       value: "false"
-  image: sonobuoy/kube-bench:v0.7.0
+  image: sonobuoy/kube-bench:v0.7.3
   name: plugin
   resources: {}
   volumeMounts:
