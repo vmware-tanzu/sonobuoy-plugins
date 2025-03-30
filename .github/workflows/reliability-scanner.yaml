@@ -1,0 +1,23 @@
+name: Reliability Scanner
+
+on:
+  pull_request:
+    branches: [ master ]
+    paths:
+    - 'reliability-scanner'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - name: Build
+      run: cd reliability-scanner && go build -v ./...
+
+    - name: Test
+      run: cd reliability-scanner && go test -v ./...

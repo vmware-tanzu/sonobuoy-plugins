@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -52,7 +53,7 @@ func scan() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-
+	logger.Info(fmt.Sprintf("Configured %v checks.", len(c.Checks)))
 	runner.Run()
 	report := runner.BuildReport(len(c.Checks), reportName)
 	err = runner.WriteReport(report, os.Getenv("SONOBUOY_RESULTS_DIR"))
