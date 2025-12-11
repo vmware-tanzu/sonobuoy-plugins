@@ -13,30 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Get qemu-user-static
-ARG IMAGEARCH
-FROM alpine:3.9.2 as qemu
-RUN apk add --no-cache curl
-ARG QEMUVERSION=6.1.0-6
-ARG QEMUARCH
+FROM  buildpack-deps:stable-scm
 
-SHELL ["/bin/ash", "-o", "pipefail", "-c"]
-
-RUN curl -fsSL https://github.com/multiarch/qemu-user-static/releases/download/v${QEMUVERSION}/qemu-${QEMUARCH}-static.tar.gz | tar zxvf - -C /usr/bin
-RUN chmod +x /usr/bin/qemu-*
-
-FROM ${IMAGEARCH}buildpack-deps:stable-scm
 MAINTAINER John Schnake "jschnake@vmware.com"
-
-ARG QEMUARCH
-COPY --from=qemu /usr/bin/qemu-${QEMUARCH}-static /usr/bin/
 
 RUN apt-get update && apt-get -y --no-install-recommends install \
     ca-certificates \
     && rm -rf /var/cache/apt/* \
     && rm -rf /var/lib/apt/lists/*
-COPY get_systemd_logs.sh /get_systemd_logs.sh
 
-RUN rm -f /usr/bin/qemu-${QEMUARCH}-static
+COPY get_systemd_logs.sh /get_systemd_logs.sh
 
 CMD ["/bin/bash", "-c", "/get_systemd_logs.sh"]

@@ -16,86 +16,49 @@
 # does not yet publish a released e2e container
 # https://github.com/kubernetes/kubernetes/issues/47920
 
-TARGET = systemd-logs
 REGISTRY ?= sonobuoy
+TARGET = systemd-logs
 IMAGE = $(REGISTRY)/$(TARGET)
+
 DOCKER ?= docker
 DIR := ${CURDIR}
-VERSION ?= v0.4
+VERSION ?= v0.5
+PLATFORMS = linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/riscv64
 
-ARCH    ?= amd64
-LINUX_ARCHS = amd64 arm64 ppc64le s390x
-PLATFORMS = linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
-
-IMAGEARCH ?=
-QEMUARCH  ?=
-
-MANIFEST_TOOL_VERSION := v1.0.0
-
-ifneq ($(ARCH),amd64)
-TARGET = systemd-logs-$(ARCH)
-endif
-
-ifeq ($(ARCH),amd64)
-IMAGEARCH =
-QEMUARCH  = x86_64
-else ifeq ($(ARCH),arm)
-IMAGEARCH = arm32v7/
-QEMUARCH  = arm
-else ifeq ($(ARCH),arm64)
-IMAGEARCH = arm64v8/
-QEMUARCH  = aarch64
-else ifeq ($(ARCH),ppc64le)
-IMAGEARCH = ppc64le/
-QEMUARCH  = ppc64le
-else ifeq ($(ARCH),s390x)
-IMAGEARCH = s390x/
-QEMUARCH  = s390x
-else
-$(error unknown arch "$(ARCH)")
-endif
+# for container load only
+ARCH ?= amd64
 
 all: container
 
-pre-cross:
-	docker run --rm --privileged multiarch/qemu-user-static:register --reset
+container: get_systemd_logs.sh
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-t $(IMAGE):$(VERSION) \
+		-t $(IMAGE):latest \
+		.
 
-build-container: get_systemd_logs.sh
-	$(DOCKER) build --build-arg IMAGEARCH=$(IMAGEARCH) \
-               --build-arg QEMUARCH=$(QEMUARCH) \
-               -t $(REGISTRY)/$(TARGET):latest -t $(REGISTRY)/$(TARGET):$(VERSION) .
+load-container: get_systemd_logs.sh
+	echo "start load contianer for $(ARCH)"
+	docker buildx build \
+		--platform linux/$(ARCH) \
+		-t $(IMAGE):$(VERSION) \
+		-t $(IMAGE):latest \
+		--load \
+		.
+	echo "done! load contianer for $(ARCH)"
 
-container: pre-cross
-	for arch in $(LINUX_ARCHS); do \
-		$(MAKE) build-container ARCH=$$arch TARGET="systemd-logs-$$arch"; \
-	done
+push: container
+	# Will trigger the caching mechanism
+	docker buildx build \
+			--platform $(PLATFORMS) \
+			-t $(IMAGE):$(VERSION) \
+			-t $(IMAGE):latest \
+			--push \
+			.
 
-push-image:
-	$(DOCKER) push $(REGISTRY)/$(TARGET):latest
-	$(DOCKER) push $(REGISTRY)/$(TARGET):$(VERSION)
-
-push_manifest:
-	./manifest-tool push from-args --platforms $(PLATFORMS) --template $(REGISTRY)/$(TARGET)-ARCH:$(VERSION) --target $(REGISTRY)/$(TARGET):$(VERSION)
-
-pre-push:
-	curl -sSL https://github.com/estesp/manifest-tool/releases/download/$(MANIFEST_TOOL_VERSION)/manifest-tool-linux-amd64 > manifest-tool
-	chmod +x manifest-tool
-
-push: pre-push container
-	for arch in $(LINUX_ARCHS); do \
-		$(MAKE) push-image TARGET="systemd-logs-$$arch"; \
-	done
-
-	$(MAKE) push_manifest VERSION=latest
-	$(MAKE) push_manifest
-
-.PHONY: all container push
+.PHONY: all container load-container push
 
 clean-image:
-	$(DOCKER) rmi $(REGISTRY)/$(TARGET):latest $(REGISTRY)/$(TARGET):latest || true
-	$(DOCKER) rmi $(REGISTRY)/$(TARGET):latest $(REGISTRY)/$(TARGET):$(VERSION) || true
-clean:
-	rm -f manifest-tool*
-	for arch in $(LINUX_ARCHS); do \
-		$(MAKE) clean-image TARGET=$(TARGET)-$$arch; \
-	done
+	$(DOCKER) rmi $(IMAGE):latest $(IMAGE):$(VERSION) || true
+
+clean: clean-image
