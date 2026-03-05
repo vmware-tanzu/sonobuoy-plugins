@@ -1,0 +1,81 @@
+name: systemd-logs - Build, Scan & Push
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'systemd-logs/**'
+      - '.github/workflows/build-push.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'systemd-logs/**'
+      - '.github/workflows/build-push.yaml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build systemd-logs image
+        run: cd systemd-logs && make build-container
+
+      - name: Save image to tar
+        run: |
+          mkdir -p build
+          docker save sonobuoy/systemd-logs:latest -o build/systemd-logs-${{ github.run_id }}.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: systemd-logs-image-${{ github.run_id }}
+          path: build/systemd-logs-${{ github.run_id }}.tar
+
+  vulnerability-scan:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: systemd-logs-image-${{ github.run_id }}
+          path: build
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: build/systemd-logs-${{ github.run_id }}.tar
+          format: 'table'
+          exit-code: '1'
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+  push-images:
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: [build, vulnerability-scan]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push multi-arch images
+        run: cd systemd-logs && make push
